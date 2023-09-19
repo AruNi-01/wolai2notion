@@ -5,8 +5,6 @@ from utils import utils
 import curlify
 from pprint import pprint
 
-proj_dir = '/Users/aarynlu/MyKB/Python/wolai2notion/'
-
 
 class WolaiBase(object):
     def __init__(self):
@@ -52,8 +50,8 @@ class WolaiBase(object):
                 "appSecret": self.app_secret
             }
             response = requests.post(self.base_url + "token", json=json_data)
-            # 检查响应状态码
-            if response.status_code == 200:
-                self.token = response.json()["data"]["app_token"]
-            else:
+
+            if response.status_code != 200:
                 raise ValueError("Request failed with status code:" + str(response.status_code))
+
+            self.token = response.json()["data"]["app_token"]

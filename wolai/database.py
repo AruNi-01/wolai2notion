@@ -14,17 +14,17 @@ class Database(WolaiBase):
         headers = {
             "Authorization": self.token
         }
-        url = self.base_url + "databases/{}".format(database_id)
+        url = self.base_url + "databases/" + database_id
         response = requests.get(url, headers=headers)
-        # 检查响应状态码
-        if response.status_code == 200:
-            for row in response.json()["data"]["rows"]:
-                one_row = Row()
-                one_row.page_id = row["page_id"]
-                one_row.title = row["data"]["title"]["value"]
-                self.add_row(one_row)
-        else:
+
+        if response.status_code != 200:
             raise ValueError("Request failed with status code:" + str(response.status_code))
+
+        for row in response.json()["data"]["rows"]:
+            one_row = Row()
+            one_row.page_id = row["page_id"]
+            one_row.title = row["data"]["title"]["value"]
+            self.add_row(one_row)
 
 
 class Row(Database):
