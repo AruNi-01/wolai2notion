@@ -1,4 +1,7 @@
+from wolai.base import WolaiBase
 
-class Page:
+
+class Page(WolaiBase):
     pass
+
 
