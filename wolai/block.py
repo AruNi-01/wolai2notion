@@ -9,17 +9,11 @@ class Block(Database):
     # 构造函数，传入一个 dict，包含了 block 的所有信息
     def __init__(self):
         super().__init__()
-        self.type = None  # block 的类型，例如 header、text 等
+        self.type = None  # block 的类型，例如 heading、text、code 等
         self.content = []  # content 是一个 list，每个元素是一个 dict，包含了一个 block 的所有内容
         self.children_ids = []  # 如果 children_ids 为空，则表示没有子 block（普通文本）
         self.level = None  # 如果 type 是 header 类型，则 level 为 header 的级别，否则无此字段
         self.language = None    # 如果 type 是 code 类型，则 language 为代码语言，否则无此字段
-
-    def get_all_content(self):
-        content_data = []
-        for item in self.content:
-            content_data.append(item)
-        return content_data
 
     def get_block_list_from_page(self, page_id):
         return self.get_block_list(page_id, True)
@@ -37,6 +31,7 @@ class Block(Database):
         url = self.base_url + "blocks/" + page_or_block_id
         if is_get_children:
             url += "/children"
+
         response = requests.get(url, headers=headers)
 
         if response.status_code != 200:

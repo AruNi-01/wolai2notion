@@ -3,6 +3,7 @@ import os
 from common.common_block import BlockType, BlockContentType, BlockContent
 from utils import utils
 from wolai.block import Block
+from notion.client import NotionClient
 
 wolai_base = Block()
 wolai_conf = utils.get_yaml_data(os.path.join(wolai_base.conf_dir, 'wolai_conf.yml'))
@@ -10,11 +11,14 @@ wolai_base.app_id = wolai_conf["base_info"]["app_id"]
 wolai_base.app_secret = wolai_conf["base_info"]["app_secret"]
 
 
+def start_convert():
+    get_block_list_from_page()
+
+
 def get_block_list_from_page():
     wolai_base.get_all_rows(wolai_conf['database_info']['database_id'])
     for database_row in wolai_base.rows:
         block_handle(database_row, is_from_page=True)
-        continue
 
 
 def block_handle(database_row, is_from_page=False):
@@ -24,9 +28,9 @@ def block_handle(database_row, is_from_page=False):
         block_list = wolai_base.get_block_list_from_block(database_row.page_id)
 
     for block in block_list:
-        print("===================TEST: block 信息==================")
+        print("===================block 信息==================")
         print(f'block.type: {block.type}, block.content: {block.content}, block.children_ids: {block.children_ids}')
-        print("===================TEST: block 信息==================")
+        print("===================block 信息==================")
 
         common_block_type = None
         attach_info = None
@@ -62,28 +66,15 @@ def block_handle(database_row, is_from_page=False):
             new_block.content = text['title']
             common_block_content_list.append(new_block)
 
-        # wolai block 内容
-        for text in block.content:
-            new_block = BlockContent()
-            if 'bold' in text and text['bold'] is True:
-                print("加粗文本: " + text['title'])
-            elif 'inline_code' in text and text['inline_code'] is True:
-                print("行内代码: " + text['title'])
-            else:
-                print("普通文本: " + text['title'])
-            new_block.content = text['title']
-
         # TODO: 根据上面的 block.type 和 block.content 生成的内容，将此 Block 插入到 Notion 中
 
         # attach_info 为附加信息，例如当 block.type 为 heading 时，attach_info 为 header 的级别，当 block.type 为 code 时，attach_info 为代码语言
-        # Notion.insert(common_block_type, block.content, attach_info)
+        # Notion.insert(common_block_type, common_block_content_list, attach_info)
 
         # 递归处理子 Block
         for child_id in block.children_ids:
-            print("++++++++++++++++++++递归处理子 Block++++++++++++++++++++")
             block_handle(child_id, is_from_page=False)
 
 
 if __name__ == '__main__':
-    get_block_list_from_page()
-
+    start_convert()
