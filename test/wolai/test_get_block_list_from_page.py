@@ -1,35 +1,29 @@
-import os
-
 from common.common_block import BlockType, BlockContentType, BlockContent
-from utils import utils
 from wolai.block import Block
 
 wolai_base = Block()
-wolai_conf = utils.get_yaml_data(os.path.join(wolai_base.conf_dir, 'wolai_conf.yml'))
-wolai_base.app_id = wolai_conf["base_info"]["app_id"]
-wolai_base.app_secret = wolai_conf["base_info"]["app_secret"]
+wolai_base.init_token()
 
 
 def get_block_list_from_page():
-    wolai_base.get_all_rows(wolai_conf['database_info']['database_id'])
+    wolai_base.get_all_rows(wolai_base.get_leetcode_database_id())
     for database_row in wolai_base.rows:
-        block_handle(database_row, is_from_page=True)
-        continue
+        block_handle(database_row.page_id, is_from_page=True)
+        break
 
 
-def block_handle(database_row, is_from_page=False):
+def block_handle(block_id, is_from_page=False):
     if is_from_page:
-        block_list = wolai_base.get_block_list_from_page(database_row.page_id)
+        block_list = wolai_base.get_block_list_from_page(block_id)
     else:
-        block_list = wolai_base.get_block_list_from_block(database_row.page_id)
+        block_list = wolai_base.get_block_list_from_block(block_id)
 
     for block in block_list:
         print("===================TEST: block 信息==================")
         print(f'block.type: {block.type}, block.content: {block.content}, block.children_ids: {block.children_ids}')
         print("===================TEST: block 信息==================")
 
-        common_block_type = None
-        attach_info = None
+        common_block_type, attach_info = None, None
         # wolai block 类型
         if block.type == 'heading':
             common_block_type = BlockType.HEADING
@@ -81,7 +75,7 @@ def block_handle(database_row, is_from_page=False):
         # 递归处理子 Block
         for child_id in block.children_ids:
             print("++++++++++++++++++++递归处理子 Block++++++++++++++++++++")
-            block_handle(child_id, is_from_page=False)
+            block_handle(child_id)
 
 
 if __name__ == '__main__':
