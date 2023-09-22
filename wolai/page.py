@@ -1,6 +1,7 @@
 from wolai.base import WolaiBase
 
 
+# Page，对应 database 中的每一行
 class Page(WolaiBase):
     def __init__(self):
         super().__init__()

@@ -1,7 +1,5 @@
 base_info:
   secrets: secret_dLB4i2uXqHj1fDBpwNpbbINn6Mqv8iyCEPDRlYYkSE3
-  token_v2: 24_CGlHEfUj-i1mJcpkeU2ddGFh4pQs0ky9NGVtE9j_aD4-a9YHUsSlHjoMmyIGxPOuVfZx6CRDnVFsUh0stxoo-mBvPGSb3M9qDQY1Nv8_HT4Brb_-ySUyQ9ALlAr2N72kr
-  user_name: aarynlu
 
 database_info:
-  leetcode_database_id: LeetCode-5e748f5f012743ae97b12a93908c9e58
+  leetcode_database_id: 3db93a181d91470e852db20a04a2f1da
