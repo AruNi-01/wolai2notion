@@ -11,6 +11,7 @@ class Block(Database):
         self.content = []  # content 是一个 list，每个元素是一个 dict，包含了一个 block 的所有内容
         self.children_ids = []  # 如果 children_ids 为空，则表示没有子 block（普通文本）
         self.level = None  # 如果 type 是 header 类型，则 level 为 header 的级别，否则无此字段
+        self.toggle = None  # 如果 type 是 header 类型，则 toggle 为 header 是否展开，否则无此字段
         self.language = None    # 如果 type 是 code 类型，则 language 为代码语言，否则无此字段
         self.url = None     # 如果 type 是 bookmark 类型，则 url 为书签的 url，否则无此字段
 
@@ -51,6 +52,8 @@ class Block(Database):
             block.children_ids = json_block['children']['ids']
             if block.type == WolaiBlockType.HEADING:
                 block.level = json_block['level']
+                if 'toggle' in json_block and json_block['toggle'] is True:
+                    block.toggle = json_block['toggle']
             if block.type == WolaiBlockType.CODE:
                 block.language = json_block['language']
             if block.type == WolaiBlockType.BOOKMARK:

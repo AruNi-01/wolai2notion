@@ -31,11 +31,11 @@ def get_block_type_from_wolai(wolai_block_type, attach_info):
     """
 
     if wolai_block_type == WolaiBlockType.HEADING:
-        if attach_info == 1:
+        if attach_info['level'] == 1:
             return NotionBlockType.HEADING_1
-        elif attach_info == 2:
+        elif attach_info['level'] == 2:
             return NotionBlockType.HEADING_2
-        elif attach_info == 3 or attach_info == 4:
+        elif attach_info['level'] == 3 or attach_info['level'] == 4:
             return NotionBlockType.HEADING_3
     if wolai_block_type == WolaiBlockType.ENUM_LIST:
         return NotionBlockType.NUMBERED_LIST_ITEM
