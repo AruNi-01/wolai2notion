@@ -1,4 +1,4 @@
-from common.common_block import BlockType, BlockContentType, BlockContent
+from block_convert.wolai_block import WolaiBlockType, WolaiBlockContentType, WolaiBlockContent
 from wolai.block import Block
 
 wolai_base = Block()
@@ -23,42 +23,42 @@ def block_handle(block_id, is_from_page=False):
         print(f'block.type: {block.type}, block.content: {block.content}, block.children_ids: {block.children_ids}')
         print("===================TEST: block 信息==================")
 
-        common_block_type, attach_info = None, None
+        wolai_block_type, attach_info = None, None
         # wolai block 类型
         if block.type == 'heading':
-            common_block_type = BlockType.HEADING
+            wolai_block_type = WolaiBlockType.HEADING
             attach_info = block.level
         if block.type == 'enum_list':
-            common_block_type = BlockType.ENUM_LIST
+            wolai_block_type = WolaiBlockType.ENUM_LIST
         if block.type == 'bull_list':
-            common_block_type = BlockType.BULL_LIST
+            wolai_block_type = WolaiBlockType.BULL_LIST
         if block.type == 'code':
-            common_block_type = BlockType.CODE
+            wolai_block_type = WolaiBlockType.CODE
             attach_info = block.language
         if block.type == 'image':
-            common_block_type = BlockType.IMAGE
+            wolai_block_type = WolaiBlockType.IMAGE
         if block.type == 'quote':
-            common_block_type = BlockType.QUOTE
+            wolai_block_type = WolaiBlockType.QUOTE
         if block.type == 'text':
-            common_block_type = BlockType.TEXT
+            wolai_block_type = WolaiBlockType.TEXT
 
-        common_block_content_list = []
+        wolai_block_content_list = []
         # wolai block 内容
         for text in block.content:
-            new_block = BlockContent()
+            new_block = WolaiBlockContent()
             # 注意：先判断 bold, inline_code 等是否存在，因为普通的 text，没有这些字段
             if 'bold' in text and text['bold'] is True:
-                new_block.content_type = BlockContentType.BOLD
+                new_block.content_type = WolaiBlockContentType.BOLD
             elif 'inline_code' in text and text['inline_code'] is True:
-                new_block.content_type = BlockContentType.INLINE_CODE
+                new_block.content_type = WolaiBlockContentType.INLINE_CODE
             else:
-                new_block.content_type = BlockContentType.TEXT
+                new_block.content_type = WolaiBlockContentType.TEXT
             new_block.content = text['title']
-            common_block_content_list.append(new_block)
+            wolai_block_content_list.append(new_block)
 
         # wolai block 内容
         for text in block.content:
-            new_block = BlockContent()
+            new_block = WolaiBlockContent()
             if 'bold' in text and text['bold'] is True:
                 print("加粗文本: " + text['title'])
             elif 'inline_code' in text and text['inline_code'] is True:
@@ -70,7 +70,7 @@ def block_handle(block_id, is_from_page=False):
         # TODO: 根据上面的 block.type 和 block.content 生成的内容，将此 Block 插入到 Notion 中
 
         # attach_info 为附加信息，例如当 block.type 为 heading 时，attach_info 为 header 的级别，当 block.type 为 code 时，attach_info 为代码语言
-        # Notion.insert(common_block_type, block.content, attach_info)
+        # Notion.insert(wolai_block_type, block.content, attach_info)
 
         # 递归处理子 Block
         for child_id in block.children_ids:

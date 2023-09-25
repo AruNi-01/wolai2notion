@@ -1,12 +1,10 @@
-import json
-
 import requests
 
+from block_convert.wolai_block import WolaiBlockType
 from wolai.database import Database
 
 
 class Block(Database):
-    # 构造函数，传入一个 dict，包含了 block 的所有信息
     def __init__(self):
         super().__init__()
         self.type = None  # block 的类型，例如 heading、text、code 等
@@ -14,6 +12,7 @@ class Block(Database):
         self.children_ids = []  # 如果 children_ids 为空，则表示没有子 block（普通文本）
         self.level = None  # 如果 type 是 header 类型，则 level 为 header 的级别，否则无此字段
         self.language = None    # 如果 type 是 code 类型，则 language 为代码语言，否则无此字段
+        self.url = None     # 如果 type 是 bookmark 类型，则 url 为书签的 url，否则无此字段
 
     def get_block_list_from_page(self, page_id):
         return self.get_block_list(page_id, True)
@@ -50,10 +49,12 @@ class Block(Database):
             block.type = json_block['type']
             block.content = json_block['content']
             block.children_ids = json_block['children']['ids']
-            if block.type == "heading":
+            if block.type == WolaiBlockType.HEADING:
                 block.level = json_block['level']
-            if block.type == "code":
+            if block.type == WolaiBlockType.CODE:
                 block.language = json_block['language']
+            if block.type == WolaiBlockType.BOOKMARK:
+                block.url = json_block['bookmark_source']
             block_list.append(block)
 
         return block_list
