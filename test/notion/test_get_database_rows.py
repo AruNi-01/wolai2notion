@@ -3,7 +3,7 @@ from notion.database import Database
 
 def test_get_database_rows():
     database = Database()
-    database.get_all_rows(database_id=database.get_leetcode_database_id())
+    database.get_all_rows(database_id=database.get_database_id())
     print(f'database rows num: {len(database.rows)}')
 
     database.rows.sort(key=lambda x: x.title)

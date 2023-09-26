@@ -22,8 +22,8 @@ class Database(NotionBase):
                     }
                 )
             except Exception as e:
-                print(f'❌ 获取 database 失败 ❌，database_id 【{database_id}】，原因: {e}')
-                return
+                print(f'❌ 获取 notion_database 失败 ❌，database_id 【{database_id}】，原因: {e}')
+                raise e
 
             for row in json_page["results"]:
                 one_row = Page()

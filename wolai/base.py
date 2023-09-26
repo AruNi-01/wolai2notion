@@ -31,6 +31,6 @@ class WolaiBase(object):
             self.token = response.json()["data"]["app_token"]
 
     @staticmethod
-    def get_leetcode_database_id():
+    def get_database_id():
         config = utils.get_conf_data()
         return config["wolai"]["database_info"]["database_id"]

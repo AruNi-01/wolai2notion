@@ -6,7 +6,7 @@ wolai_base.init_token()
 
 
 def get_block_list_from_page():
-    wolai_base.get_all_rows(wolai_base.get_leetcode_database_id())
+    wolai_base.get_all_rows(wolai_base.get_database_id())
     for database_row in wolai_base.rows:
         block_handle(database_row.page_id, is_from_page=True)
         break

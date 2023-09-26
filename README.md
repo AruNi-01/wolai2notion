@@ -7,6 +7,7 @@ Wolai 是直接使用官方提供的 [API](https://www.wolai.com/wolai/7FB9PLeqZ
 ## Features
 - [x] Wolai Database Row(Page) 的转换
   - [x] Page 中 Block 父子关系的处理
+  - [x] 并发转换，根据电脑的 CPU 核心输入线程数（log 和 csv 会混乱）
 - [ ] 纯 Page 的转换/导入
 
 ## Database Row(Page) Convert
@@ -46,7 +47,7 @@ Database 的 property 可以直接导出为 csv，然后 import 进 Notion 即�
    `base_info` 中的信息可以查看 [App 开发者中心](https://aarynlu.notion.site/aarynlu/App-34980aba84f048788b735f969742bdaa) 中对应的 API 文档；`database_info` 中的 `database_id` 可以在对应 Database 中的链接中找到（如果是把 database 嵌入一个页面的话，注意是 database_id，而不是 page_id）。
 3. 运行：
     ```bash
-    python start_convert.py
+    python ./run/convert_database_row.py
     ```
 4. 运行时，会先填入需要转换的起始和结束的 idx，这个 idx 是 database 所有 row 经过 title 排序后数组的 idx，所以运行前最好先去 test 文件中看看 database rows 的 title 排序，然后填入对应的 idx。
    示例：
