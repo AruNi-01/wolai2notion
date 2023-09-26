@@ -7,7 +7,7 @@ Wolai 是直接使用官方提供的 [API](https://www.wolai.com/wolai/7FB9PLeqZ
 ## Features
 - [x] Wolai Database Row(Page) 的转换
   - [x] Page 中 Block 父子关系的处理
-- [ ] 纯 Page 的转换
+- [ ] 纯 Page 的转换/导入
 
 ## Database Row(Page) Convert
 
