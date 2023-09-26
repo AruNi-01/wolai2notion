@@ -1,8 +1,4 @@
 requests~=2.31.0
-curlify
 pyyaml~=6.0.1
-
-
-notion~=0.0.28
 urllib3==2.0.5
 notion-client==2.0.0

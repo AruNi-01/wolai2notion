@@ -15,6 +15,7 @@ PAGE_MATCH_IDX = 0  # 匹配到的 notion page 的 index，因为 database_row �
 start_idx, end_idx = 0, 0  # 处理 database_row 的起始 index 和结束 index
 
 parent_block_id_stack = []  # 由于是由父到子递归的插入 block，因此使用 stack 来记录上一个 block 的 id
+parent_block_id = None  # 当前 block 的 parent_block_id
 
 
 def start_convert():
@@ -26,7 +27,8 @@ def start_convert():
     # 从控制台获取 start_idx, end_idx
     start_idx = int(input('请输入从第几行(包括) database_row 开始转换 (min 0): '))
     end_idx = int(input(f'请输入到第几行(包括) database_row 结束转换 (max {len(wolai.rows) - 1}): '))
-    print(f'转换区间为 [{start_idx}, {end_idx}]，从【{wolai.rows[start_idx].title}】开始转换...')
+    print(f'转换区间为 [{start_idx}, {end_idx}]，总计 {end_idx - start_idx + 1} 个，'
+          f'从【{wolai.rows[start_idx].title}】开始, 到【{wolai.rows[end_idx].title}】结束')
 
     # 写 csv 文件表头
     utils.write_csv_row_with_convert_res(list_item=["wolai_page_id", "wolai_page_title", "top_block"])
@@ -43,14 +45,15 @@ def start_convert():
         PAGE_MATCH_IDX += 1  # 处理完一个 database_row，PAGE_MATCH_IDX + 1
 
         utils.write_csv_row_with_convert_res(list_item=["", "", ""])  # 写空行，用于分割不同的 database_row
-        utils.write_csv_row_with_convert_process(list_item=[start_idx + 1, len(wolai.rows)])  # 写进度
+        utils.write_csv_row_with_convert_process(list_item=[PAGE_MATCH_IDX + 1, len(wolai.rows)])  # 写进度
 
 
-def block_handle(block_id, is_from_page=False):
+def block_handle(block_id, is_from_page=False, handle_children=False):
     """
     递归处理 block，将 block 转换为 notion 中的 block
     :param block_id:
     :param is_from_page: 为 True 时说明是处理 database_row(page)，也需要匹配 notion 中的 page
+    :param handle_children: 为 True 时说明是处理 block 的子 block
     :return:
     """
 
@@ -93,14 +96,10 @@ def block_handle(block_id, is_from_page=False):
             new_block.content = text['title']
             wolai_block_content_list.append(new_block)
 
-        insert_notion_block(block.type, wolai_block_content_list, attach_info, has_children)
-
-        # 递归处理子 Block
-        for child_id in block.children_ids:
-            block_handle(child_id)
+        insert_notion_block(block.type, wolai_block_content_list, attach_info, handle_children, block.children_ids)
 
 
-def insert_notion_block(wolai_block_type, wolai_block_content_list, attach_info, has_children):
+def insert_notion_block(wolai_block_type, wolai_block_content_list, attach_info, handle_children, wolai_children_ids):
     """
     向 notion 中插入 block，
     :param wolai_block_type: block 类型
@@ -108,7 +107,8 @@ def insert_notion_block(wolai_block_type, wolai_block_content_list, attach_info,
     :param attach_info: 附加信息：
                 · 当 wolai_block_type 为 heading 时，attach_info 是一个 dict，level 是 header 的级别；且当 toggle 不为 None 时 header 可折叠
                 · 当 block.type 为 code 时，attach_info 为代码语言...
-    :param has_children: 是否有子 block
+    :param handle_children: 是否处理子 block
+    :param wolai_children_ids: 子 block 的 id list
     :return:
     """
 
@@ -119,7 +119,7 @@ def insert_notion_block(wolai_block_type, wolai_block_content_list, attach_info,
         notion.rows.sort(key=lambda x: x.title)  # 按 title 排序，wolai_rows 也是按 title 排序的，所以可以一一对应
         insert_notion_block.has_executed = True
 
-    global parent_block_id_stack
+    global parent_block_id_stack, parent_block_id
     children = []  # 调用 notion API 时的参数，用于插入子 block
 
     notion_block_type = notion_block.get_block_type_from_wolai(wolai_block_type, attach_info)
@@ -153,7 +153,7 @@ def insert_notion_block(wolai_block_type, wolai_block_content_list, attach_info,
     }
 
     # 当 attach_info 有 toggle 字段时，设置为可折叠
-    if attach_info is not None and attach_info['toggle']:
+    if attach_info is not None and 'toggle' in attach_info and attach_info['toggle'] is True:
         children_item[notion_block_type]['is_toggleable'] = True  # 一级标题需要设置为可折叠
 
     # 根据 block 类型，添加/删除不同的属性
@@ -169,9 +169,9 @@ def insert_notion_block(wolai_block_type, wolai_block_content_list, attach_info,
 
     # 一级标题的 parent_block_id 为 notion_page.page_id，其他的 parent_block_id 都是上一个 block 的 id
     if notion_block_type == notion_block.NotionBlockType.HEADING_1:
-        parent_block_id_stack.append(notion_page.page_id)
-
-    parent_block_id = parent_block_id_stack[-1]   # 获取栈顶元素 — 当前 block 的 parent_block_id
+        parent_block_id = notion_page.page_id
+    if handle_children:    # 当处理子 block 时，parent_block_id 为上一个 block 的 id
+        parent_block_id = parent_block_id_stack[-1]
 
     try:
         response = notion.blocks.children.append(
@@ -181,19 +181,22 @@ def insert_notion_block(wolai_block_type, wolai_block_content_list, attach_info,
             }
         )
     except Exception as e:
-        print(f'❌❌❌❌❌❌ 插入 block 失败，database_row title 【{wolai_page.title}】，原因: {e}')
-        raise e
-
-    # 当插入的 block 有子 block 时，将该 block 的 id 入栈，用于插入它的子 block
-    if has_children:
-        parent_block_id_stack.append(response['results'][0]['id'])
+        print(f'❌ 插入 block 失败 ❌，database_row title 【{wolai_page.title}】，原因: {e}')
+        return
 
     if notion_block_type == notion_block.NotionBlockType.HEADING_1:
         utils.write_csv_row_with_convert_res(
             list_item=[wolai_page.page_id, wolai_page.title, wolai_block_content_list[0].content]
         )
 
-    print(f'========== 插入 block 完毕，response: {json.dumps(response, indent=4)}')
+    print(f'✅ 插入 block 成功 ✅，response: {json.dumps(response, indent=4)}')
+
+    # 递归处理子 Block（回溯法解决父子 block 的 parent_id 问题）
+    for child_id in wolai_children_ids:
+        # 当插入的 block 有子 block 时，将该 block 的 id 入栈，用于插入它的子 block
+        parent_block_id_stack.append(response['results'][0]['id'])
+        block_handle(child_id, handle_children=True)
+        parent_block_id_stack.pop()  # 处理完一个 block 的子 block，将该 block 的 id 出栈
 
 
 if __name__ == '__main__':

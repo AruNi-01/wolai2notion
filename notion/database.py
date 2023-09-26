@@ -13,13 +13,17 @@ class Database(NotionBase):
 
     def get_all_rows(self, database_id):
         while True:
-            json_page = self.databases.query(
-                **{
-                    "database_id": database_id,
-                    "start_cursor": self._start_cursor,
-                    "page_size": 100,  # maximum page size is 100
-                }
-            )
+            try:
+                json_page = self.databases.query(
+                    **{
+                        "database_id": database_id,
+                        "start_cursor": self._start_cursor,
+                        "page_size": 100,  # maximum page size is 100
+                    }
+                )
+            except Exception as e:
+                print(f'❌ 获取 database 失败 ❌，database_id 【{database_id}】，原因: {e}')
+                return
 
             for row in json_page["results"]:
                 one_row = Page()
