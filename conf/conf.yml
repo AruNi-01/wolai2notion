@@ -4,7 +4,7 @@ wolai:
     app_secret: 8bf139a219379d2b4d0513d2d3deb3c34db72a8d782c7f4e38f90c3d052a6638
 
   database_info:
-    leetcode_database_id: t8FRZDBoFmrprSZmRYywzd
+    database_id: t8FRZDBoFmrprSZmRYywzd
 
 
 notion:
@@ -12,8 +12,4 @@ notion:
     secrets: secret_dLB4i2uXqHj1fDBpwNpbbINn6Mqv8iyCEPDRlYYkSE3
 
   database_info:
-    leetcode_database_id: 3db93a181d91470e852db20a04a2f1da
-
-
-csv:
-  convert_res_path: ./csv_result/convert_res.csv
+    database_id: 3db93a181d91470e852db20a04a2f1da

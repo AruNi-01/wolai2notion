@@ -18,4 +18,4 @@ class NotionBase(Client):
     @staticmethod
     def get_leetcode_database_id():
         config = utils.get_conf_data()
-        return config["notion"]["database_info"]["leetcode_database_id"]
+        return config["notion"]["database_info"]["database_id"]
