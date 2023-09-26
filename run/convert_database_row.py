@@ -9,7 +9,6 @@ from utils import utils
 from wolai.block import Block as WolaiBlock
 
 wolai = WolaiBlock()
-wolai.init_token()
 notion = NotionDatabase()
 
 

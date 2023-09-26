@@ -2,7 +2,6 @@ from block_convert.wolai_block import WolaiBlockType, WolaiBlockContentType, Wol
 from wolai.block import Block
 
 wolai_base = Block()
-wolai_base.init_token()
 
 
 def get_block_list_from_page():
