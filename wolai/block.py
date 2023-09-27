@@ -13,7 +13,7 @@ class Block(Database):
         self.level = None  # 如果 type 是 header 类型，则 level 为 header 的级别，否则无此字段
         self.toggle = None  # 如果 type 是 header 类型，则 toggle 为 header 是否展开，否则无此字段
         self.language = None    # 如果 type 是 code 类型，则 language 为代码语言，否则无此字段
-        self.url = None     # 如果 type 是 bookmark 类型，则 url 为书签的 url，否则无此字段
+        self.url = None     # 如果 type 是 bookmark, image 类型，则 url 为其 url 地址，否则无此字段
 
     def get_block_list_from_page(self, page_id):
         return self.get_block_list(page_id, True)
@@ -58,6 +58,8 @@ class Block(Database):
                 block.language = json_block['language']
             if block.type == WolaiBlockType.BOOKMARK:
                 block.url = json_block['bookmark_source']
+            if block.type == WolaiBlockType.IMAGE:
+                block.url = json_block['media']['download_url']
             block_list.append(block)
 
         return block_list

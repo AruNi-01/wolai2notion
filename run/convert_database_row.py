@@ -91,6 +91,8 @@ def block_handle(block_id, page_match_idx, parent_block_id_stack, parent_block_i
             attach_info = block.language
         if block.type == WolaiBlockType.BOOKMARK:
             attach_info = block.url
+        if block.type == WolaiBlockType.IMAGE:
+            attach_info = block.url
         if block.children_ids:
             has_children = True
 
@@ -175,6 +177,12 @@ def insert_notion_block(
         children_item[notion_block_type]['url'] = attach_info
     if notion_block_type == notion_block.NotionBlockType.DIVIDER:
         del children_item[notion_block_type]['rich_text']  # divider 类型的 block 不需要 rich_text
+    if notion_block_type == notion_block.NotionBlockType.IMAGE:     # image 类型的 block 需要设置为 external 类型
+        del children_item[notion_block_type]['rich_text']
+        children_item[notion_block_type]['type'] = 'external'
+        children_item[notion_block_type]['external'] = {
+            "url": attach_info
+        }
 
     children.append(children_item)
 
@@ -192,7 +200,7 @@ def insert_notion_block(
             }
         )
     except Exception as e:
-        print(f'❌ 插入 block 失败 ❌，database_row title 【{wolai_page.title}】，原因: {e}')
+        print(f'❌ 插入 block 失败 ❌，database_row idx【{page_match_idx}】, title【{wolai_page.title}】，原因: {e}')
         raise e
 
     # 当插入的 block 是一级标题时，记录一下转换结果（以一级标题来细化，当插入失败时，可以根据一级标题来定位）

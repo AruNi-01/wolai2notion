@@ -6,9 +6,9 @@ Wolai 是直接使用官方提供的 [API](https://www.wolai.com/wolai/7FB9PLeqZ
 
 ## Features
 - [x] Wolai Database Row(Page) 的转换
-  - [x] Page 中 Block 父子关系的处理
-  - [x] 并发转换，根据电脑的 CPU 核心输入线程数（log 和 csv 会混乱）
-- [ ] 纯 Page 的转换/导入
+  - [x] 并发转换，提高 rows 过多时的转换速度，但 log 和 csv 会混乱
+- [ ] 纯 Page 的转换/导入（无 Inline Database）
+- [ ] image/file 上传至 oss，然后替换 url（[Notion API 暂时不支持上传 file 到 Notion](https://developers.notion.com/reference/file-object)）
 
 ## Database Row(Page) Convert
 
