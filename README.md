@@ -7,8 +7,8 @@ Wolai 是直接使用官方提供的 [API](https://www.wolai.com/wolai/7FB9PLeqZ
 ## Features
 - [x] Wolai Database Row(Page) 的转换
   - [x] 并发转换，提高 rows 过多时的转换速度，但 log 和 csv 会混乱
+- [x] image/file 上传至 oss，然后替换 url（[Notion API 暂时不支持上传 file 到 Notion](https://developers.notion.com/reference/file-object)）
 - [ ] 纯 Page 的转换/导入（无 Inline Database）
-- [ ] image/file 上传至 oss，然后替换 url（[Notion API 暂时不支持上传 file 到 Notion](https://developers.notion.com/reference/file-object)）
 
 ## Database Row(Page) Convert
 
@@ -30,8 +30,8 @@ Database 的 property 可以直接导出为 csv，然后 import 进 Notion 即�
     ```yml
    wolai:
      base_info:
-       app_id: cAjdczZs9sPsRpBf243aoi
-       app_secret: 8bf139a219379d2b4d0513d2d3deb3c34db72a8d782c7f4e38f90c3d052a6638
+       app_id: xxxxxxx
+       app_secret: xxxxxxxxxxx
    
      database_info:
        database_id: t8FRZDBoFmrprSZmRYywzd
@@ -39,10 +39,22 @@ Database 的 property 可以直接导出为 csv，然后 import 进 Notion 即�
    
    notion:
      base_info:
-       secrets: secret_dLB4i2uXqHj1fDBpwNpbbINn6Mqv8iyCEPDRlYYkSE3
+       secrets: xxxxxxxxxxxx
    
      database_info:
        database_id: 3db93a181d91470e852db20a04a2f1da
+   
+   # 若需要上传图片到 oss
+   oss:
+     base_info:
+       access_key_id: xxxxxx
+       access_key_secret: xxxxxxx
+       endpoint: oss-cn-beijing.aliyuncs.com
+       bucket_name: run-notion
+   
+     upload_info:
+       # 上传到 oss bucket 的文件夹（例如 abc/efg），不包含 Bucket 名称和具体的文件名（例如 abc.jpg）。
+       oss_file_path: from_wolai_img
     ```
    `base_info` 中的信息可以查看 [App 开发者中心](https://aarynlu.notion.site/aarynlu/App-34980aba84f048788b735f969742bdaa) 中对应的 API 文档；`database_info` 中的 `database_id` 可以在对应 Database 中的链接中找到（如果是把 database 嵌入一个页面的话，注意是 database_id，而不是 page_id）。
 3. 运行：
