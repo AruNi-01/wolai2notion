@@ -5,14 +5,17 @@ from block_convert.wolai_block import WolaiBlockType, WolaiBlockContentType, Wol
 from block_convert import notion_block
 
 from notion.database import Database as NotionDatabase
-from utils import utils
+from utils import utils, oss_client
 from wolai.block import Block as WolaiBlock
 
 wolai = WolaiBlock()
 notion = NotionDatabase()
+oss = None
 
 
 def start_convert():
+    global oss
+
     print(f'正在获取 wolai 和 notion 中的所有 database_row...')
     wolai.get_all_rows(wolai.get_database_id())
     notion.get_all_rows(notion.get_database_id())
@@ -25,6 +28,12 @@ def start_convert():
     end_idx = int(input(f'请输入到第几行(包括) database_row 结束转换 (max {len(wolai.rows) - 1}): '))
     print(f'转换区间为 [{start_idx}, {end_idx}]，总计 {end_idx - start_idx + 1} 个，'
           f'从【{wolai.rows[start_idx].title}】开始, 到【{wolai.rows[end_idx].title}】结束')
+
+    # 是否需要 oss 上传图片
+    need_oss = input('是否需要将 wolai 的图片上传至 oss，notion 直接访问 oss (y/n): ')
+    if need_oss == 'y':
+        oss = oss_client.OssClient()
+        print('已开启 oss 上传图片功能')
 
     # 写 csv 文件表头
     utils.write_csv_row_with_convert_res(list_item=["wolai_page_id", "wolai_page_title", "top_block"])
@@ -46,9 +55,7 @@ def start_convert():
             future = t.submit(lambda: block_handle(wolai.rows[idx].page_id, idx,
                                                    parent_block_id_stack, parent_block_id, is_from_page=True))
             if future.exception() is not None:
-                e = future.exception()
-                print(f'❌ 转换失败 ❌，database_row title 【{wolai.rows[idx].title}】，原因: {e}')
-                raise e
+                raise future.exception()
 
             utils.write_csv_row_with_convert_res(list_item=["", "", ""])  # 写空行，用于分割不同的 database_row
             utils.write_csv_row_with_convert_process(list_item=[idx + 1, len(wolai.rows)])  # 写进度
@@ -75,10 +82,6 @@ def block_handle(block_id, page_match_idx, parent_block_id_stack, parent_block_i
         block_list = wolai.get_block_list_from_block(block_id)
 
     for block in block_list:
-        print("=================== wolai block 信息 ==================")
-        print(f'block.type: {block.type}, block.content: {block.content}, block.children_ids: {block.children_ids}')
-        print("=================== wolai block 信息 ==================")
-
         attach_info, has_children = None, False
         # wolai block 类型
         if block.type == WolaiBlockType.HEADING:
@@ -114,10 +117,8 @@ def block_handle(block_id, page_match_idx, parent_block_id_stack, parent_block_i
                             handle_children, block.children_ids, page_match_idx, parent_block_id_stack, parent_block_id)
 
 
-def insert_notion_block(
-        wolai_block_type, wolai_block_content_list, attach_info, handle_children, wolai_children_ids,
-        page_match_idx, parent_block_id_stack, parent_block_id
-):
+def insert_notion_block(wolai_block_type, wolai_block_content_list, attach_info, handle_children, wolai_children_ids,
+                        page_match_idx, parent_block_id_stack, parent_block_id):
     """
     向 notion 中插入 block，
     :param wolai_block_type: block 类型
@@ -177,7 +178,9 @@ def insert_notion_block(
         children_item[notion_block_type]['url'] = attach_info
     if notion_block_type == notion_block.NotionBlockType.DIVIDER:
         del children_item[notion_block_type]['rich_text']  # divider 类型的 block 不需要 rich_text
-    if notion_block_type == notion_block.NotionBlockType.IMAGE:     # image 类型的 block 需要设置为 external 类型
+    if notion_block_type == notion_block.NotionBlockType.IMAGE:  # image 类型的 block 需要设置为 external 类型
+        if oss is not None:
+            attach_info = oss.upload_remote_image(attach_info)
         del children_item[notion_block_type]['rich_text']
         children_item[notion_block_type]['type'] = 'external'
         children_item[notion_block_type]['external'] = {
@@ -209,7 +212,7 @@ def insert_notion_block(
             list_item=[wolai_page.page_id, wolai_page.title, wolai_block_content_list[0].content]
         )
 
-    print(f'✅ 插入 block 成功 ✅，response: {json.dumps(response, indent=4)}')
+    print(f'✅ 插入 block 成功 ✅，database_row idx【{page_match_idx}】, title【{wolai_page.title}】')
 
     # 递归处理子 Block（回溯法解决父子 block 的 parent_id 问题）
     for child_id in wolai_children_ids:

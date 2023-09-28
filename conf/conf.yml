@@ -1,7 +1,7 @@
 wolai:
   base_info:
-    app_id: cAjdczZs9sPsRpBf243aoi
-    app_secret: 8bf139a219379d2b4d0513d2d3deb3c34db72a8d782c7f4e38f90c3d052a6638
+    app_id: xxxxxxxxxxxxxxxxx
+    app_secret: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
   database_info:
     database_id: t8FRZDBoFmrprSZmRYywzd
@@ -9,7 +9,20 @@ wolai:
 
 notion:
   base_info:
-    secrets: secret_dLB4i2uXqHj1fDBpwNpbbINn6Mqv8iyCEPDRlYYkSE3
+    secrets: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
   database_info:
     database_id: 3db93a181d91470e852db20a04a2f1da
+
+# 勿泄漏
+oss:
+  base_info:
+    access_key_id: xxxxxxxxxxxxxxxx
+    access_key_secret: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    endpoint: oss-cn-beijing.aliyuncs.com
+    bucket_name: run-notion
+
+  upload_info:
+    # 上传到 oss bucket 的文件夹（例如 abc/efg），不包含 Bucket 名称和具体的文件名（例如 abc.jpg）。
+    oss_file_path: from_wolai_img
+

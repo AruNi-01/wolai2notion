@@ -28,7 +28,6 @@ def write_csv_row_with_convert_res(list_item):
     with open(convert_res_csv_path, 'a', encoding="utf8") as f:
         line = ",".join(str(x) for x in list_item) + "\n"
         line = line.replace(" ", "")
-        print(f'csv write one row: {line}')
         f.write(line)
 
 
@@ -36,5 +35,4 @@ def write_csv_row_with_convert_process(list_item):
     with open(convert_process_csv_path, 'a', encoding="utf8") as f:
         line = ",".join(str(x) for x in list_item) + "\n"
         line = line.replace(" ", "")
-        print(f'csv write one row: {line}')
         f.write(line)
