@@ -6,6 +6,12 @@ wolai:
   database_info:
     database_id: t8FRZDBoFmrprSZmRYywzd
 
+  page_info:
+    parent_page_id: bc9911bac275450f965f8a4e69a60be1  # 注意：这里是 Notion 的 Parent Page ID
+    page_ids:
+      - gos2xG43iKy2LsRaopYmTZ
+      - xmcQthUywjfNhnEqbjAWDN
+
 
 notion:
   base_info:

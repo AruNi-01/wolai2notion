@@ -1,33 +1,20 @@
-import json
 from concurrent.futures import ThreadPoolExecutor
 
 from block_convert.wolai_block import WolaiBlockType, WolaiBlockContentType, WolaiBlockContent
 from block_convert import notion_block
 
-from notion.database import Database as NotionDatabase
-from utils import utils, oss_client
+from notion.page import Page as NotionPage
 from wolai.block import Block as WolaiBlock
+from wolai.page import Page as WolaiPage
+from utils import oss_client
 
 wolai = WolaiBlock()
-notion = NotionDatabase()
+notion = NotionPage()
 oss = None
 
 
 def start_convert():
     global oss
-
-    print(f'正在获取 wolai 和 notion 中的所有 database_row...')
-    wolai.get_all_rows(wolai.get_database_id())
-    notion.get_all_rows(notion.get_database_id())
-    # wolai_rows 和 notion_rows 都按 title 排序，所以可以一一对应，就不用 title 去一一匹配了
-    wolai.rows.sort(key=lambda x: x.title)
-    notion.rows.sort(key=lambda x: x.title)
-
-    # 从控制台获取 start_idx, end_idx
-    start_idx = int(input('请输入从第几行(包括) database_row 开始转换 (min 0): '))
-    end_idx = int(input(f'请输入到第几行(包括) database_row 结束转换 (max {len(wolai.rows) - 1}): '))
-    print(f'转换区间为 [{start_idx}, {end_idx}]，总计 {end_idx - start_idx + 1} 个，'
-          f'从【{wolai.rows[start_idx].title}】开始, 到【{wolai.rows[end_idx].title}】结束')
 
     # 是否需要 oss 上传图片
     need_oss = input('是否需要将 wolai 的图片上传至 oss，notion 直接访问 oss (y/n): ')
@@ -35,48 +22,41 @@ def start_convert():
         oss = oss_client.OssClient()
         print('已开启 oss 上传图片功能')
 
-    # 写 csv 文件表头
-    utils.write_csv_row_with_convert_res(list_item=["wolai_page_id", "wolai_page_title", "top_block"])
-    utils.write_csv_row_with_convert_process(list_item=["converted_rows", "total_rows"])
-
     max_workers = int(
         input('请输入线程池的最大线程数 (根据电脑 CPU 逻辑核数，并发执行控制台日志和 csv 数据会混乱，串行执行输入 1): '))
     with ThreadPoolExecutor(max_workers=max_workers) as t:
-        for idx in range(len(wolai.rows)):
-            if idx < start_idx:
-                continue
-            if idx > end_idx:
-                break
-
+        for page_id in WolaiPage.get_import_page_ids():
             parent_block_id_stack = []  # 由于是由父到子递归的插入 block，因此使用 stack 来记录上一个 block 的 id
             parent_block_id = None  # 当前 block 的 parent_block_id
 
             # 提交任务到线程池
-            future = t.submit(lambda: block_handle(wolai.rows[idx].page_id, idx,
-                                                   parent_block_id_stack, parent_block_id, is_from_page=True))
+            future = t.submit(lambda: block_handle(page_id, parent_block_id_stack, parent_block_id, is_from_page=True))
             if future.exception() is not None:
                 raise future.exception()
-
-            utils.write_csv_row_with_convert_res(list_item=["", "", ""])  # 写空行，用于分割不同的 database_row
-            utils.write_csv_row_with_convert_process(list_item=[idx + 1, len(wolai.rows)])  # 写进度
 
     t.shutdown(wait=True)  # 等待所有子线程执行完毕
 
 
-def block_handle(block_id, page_match_idx, parent_block_id_stack, parent_block_id,
-                 is_from_page=False, handle_children=False):
+def block_handle(block_id, parent_block_id_stack, parent_block_id, is_from_page=False, handle_children=False):
     """
     递归处理 block，将 block 转换为 notion 中的 block
     :param block_id: 当前处理的 block 的 id
-    :param page_match_idx: 用于获取 page，匹配 wolai 和 notion page 的 title 是否一致
     :param parent_block_id_stack: 由于是由父到子递归的插入 block，因此使用 stack 来记录上一个 block 的 id
     :param parent_block_id: 当前 block 的 parent_block_id
     :param is_from_page: 为 True 时说明是处理 database_row(page)，也需要匹配 notion 中的 page
     :param handle_children: 为 True 时说明是处理 block 的子 block
     :return:
     """
+    global notion
 
     if is_from_page:
+        # 根据 wolai_page_id 获取 page_meta 信息，创建 notion page
+        wolai_page = WolaiPage().get_page_with_meta(block_id)
+        notion = NotionPage().create_page(wolai_page)
+
+        # 创建完 notion page 后，将其 id 赋值给 parent_block_id，用于插入它的子 block
+        parent_block_id = notion.page_id
+
         block_list = wolai.get_block_list_from_page(block_id)
     else:
         block_list = wolai.get_block_list_from_block(block_id)
@@ -114,13 +94,13 @@ def block_handle(block_id, page_match_idx, parent_block_id_stack, parent_block_i
             wolai_block_content_list.append(new_block)
 
         insert_notion_block(block.type, wolai_block_content_list, attach_info,
-                            handle_children, block.children_ids, page_match_idx, parent_block_id_stack, parent_block_id)
+                            handle_children, block.children_ids, parent_block_id_stack, parent_block_id)
 
 
 def insert_notion_block(wolai_block_type, wolai_block_content_list, attach_info, handle_children, wolai_children_ids,
-                        page_match_idx, parent_block_id_stack, parent_block_id):
+                        parent_block_id_stack, parent_block_id):
     """
-    向 notion 中插入 block，
+    向 notion 中插入 block
     :param wolai_block_type: block 类型
     :param wolai_block_content_list: block 内容 list
     :param attach_info: 附加信息：
@@ -128,7 +108,6 @@ def insert_notion_block(wolai_block_type, wolai_block_content_list, attach_info,
                 · 当 block.type 为 code 时，attach_info 为代码语言...
     :param handle_children: 是否处理子 block
     :param wolai_children_ids: 子 block 的 id list
-    :param page_match_idx: 用于获取 page，匹配 wolai 和 notion page 的 title 是否一致
     :param parent_block_id_stack: 由于是由父到子递归的插入 block，因此使用 stack 来记录上一个 block 的 id
     :param parent_block_id: 当前 block 的 parent_block_id
     :return:
@@ -137,11 +116,6 @@ def insert_notion_block(wolai_block_type, wolai_block_content_list, attach_info,
     children = []  # 调用 notion API 时的参数，用于插入子 block
 
     notion_block_type = notion_block.get_block_type_from_wolai(wolai_block_type, attach_info)
-
-    # 判断 title 是否匹配
-    notion_page, wolai_page = notion.rows[page_match_idx], wolai.rows[page_match_idx]
-    if notion_page.title != wolai_page.title:
-        raise f'wolai_page: {wolai_page.title} 与 notion_page: {notion_page.title} 不匹配'
 
     # 构建 rich_text 参数
     rich_text_list = []
@@ -189,9 +163,6 @@ def insert_notion_block(wolai_block_type, wolai_block_content_list, attach_info,
 
     children.append(children_item)
 
-    # 一级标题的 parent_block_id 为 notion_page.page_id，其他的 parent_block_id 都是上一个 block 的 id
-    if notion_block_type == notion_block.NotionBlockType.HEADING_1:
-        parent_block_id = notion_page.page_id
     if handle_children:  # 当处理子 block 时，parent_block_id 为上一个 block 的 id
         parent_block_id = parent_block_id_stack[-1]
 
@@ -203,22 +174,16 @@ def insert_notion_block(wolai_block_type, wolai_block_content_list, attach_info,
             }
         )
     except Exception as e:
-        print(f'❌ 插入 block 失败 ❌，database_row idx【{page_match_idx}】, title【{wolai_page.title}】，原因: {e}')
+        print(f'❌ 插入 block 失败 ❌，page title【{notion.title}】，原因: {e}')
         raise e
 
-    # 当插入的 block 是一级标题时，记录一下转换结果（以一级标题来细化，当插入失败时，可以根据一级标题来定位）
-    if notion_block_type == notion_block.NotionBlockType.HEADING_1:
-        utils.write_csv_row_with_convert_res(
-            list_item=[wolai_page.page_id, wolai_page.title, wolai_block_content_list[0].content]
-        )
-
-    print(f'✅ 插入 block 成功 ✅，database_row idx【{page_match_idx}】, title【{wolai_page.title}】')
+    print(f'✅ 插入 block 成功 ✅，page title【{notion.title}】')
 
     # 递归处理子 Block（回溯法解决父子 block 的 parent_id 问题）
     for child_id in wolai_children_ids:
         # 当插入的 block 有子 block 时，将该 block 的 id 入栈，用于插入它的子 block
         parent_block_id_stack.append(response['results'][0]['id'])
-        block_handle(child_id, page_match_idx, parent_block_id_stack, parent_block_id, handle_children=True)
+        block_handle(child_id, parent_block_id_stack, parent_block_id, handle_children=True)
         parent_block_id_stack.pop()  # 处理完一个 block 的子 block，将该 block 的 id 出栈
 
 

@@ -7,6 +7,7 @@ class NotionBlockType:
     HEADING_3 = 'heading_3'  # 三级标题
     NUMBERED_LIST_ITEM = 'numbered_list_item'  # 有序列表
     BULLETED_LIST_ITEM = 'bulleted_list_item'  # 无序列表
+    TOGGLE = 'toggle'  # 折叠列表
     CODE = 'code'  # 代码块
     IMAGE = 'image'  # 图片
     QUOTE = 'quote'  # 引用 (markdown 中的 >)
@@ -41,6 +42,8 @@ def get_block_type_from_wolai(wolai_block_type, attach_info):
         return NotionBlockType.NUMBERED_LIST_ITEM
     if wolai_block_type == WolaiBlockType.BULL_LIST:
         return NotionBlockType.BULLETED_LIST_ITEM
+    if wolai_block_type == WolaiBlockType.TOGGLE_LIST:
+        return NotionBlockType.TOGGLE
     if wolai_block_type == WolaiBlockType.CODE:     # code language 一样，使用 attach_info 即可, 只是 notion 全是小写
         return NotionBlockType.CODE
     if wolai_block_type == WolaiBlockType.IMAGE:

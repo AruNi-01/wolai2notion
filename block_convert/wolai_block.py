@@ -3,6 +3,7 @@ class WolaiBlockType:
     HEADING = 'heading'     # 标题
     ENUM_LIST = 'enum_list'     # 有序列表
     BULL_LIST = 'bull_list'     # 无序列表
+    TOGGLE_LIST = 'toggle_list'     # 折叠列表
     CODE = 'code'       # 代码块
     IMAGE = 'image'     # 图片
     QUOTE = 'quote'     # 引用 (markdown 中的 >)
