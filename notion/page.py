@@ -20,10 +20,15 @@ class Page(NotionBase):
                     "parent": {
                         "page_id": utils.get_conf_data()['wolai']['page_info']['parent_page_id']
                     },
-                    "icon": {
-                        "type": "emoji",
-                        "emoji": self.icon
-                    },
+                    **(
+                        {
+                            "icon": {
+                                "type": "emoji",
+                                "emoji": self.icon
+                            }
+                        }
+                        if self.icon is not None else {}
+                    ),
                     "properties": {
                         "title": {
                             "id": "title",

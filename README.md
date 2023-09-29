@@ -10,15 +10,33 @@ Wolai 是直接使用官方提供的 [API](https://www.wolai.com/wolai/7FB9PLeqZ
 - [x] image/file 上传至 oss，然后替换 url（[Notion API 暂时不支持上传 file 到 Notion](https://developers.notion.com/reference/file-object)）
 - [x] 纯 Page 的导入
 
+支持的 Block、Block 内的 Content 类型：
+```python
+# Block Type
+class BlockType:
+    HEADING = 'heading'     # 标题，包括是否可折叠
+    ENUM_LIST = 'enum_list'     # 有序列表
+    BULL_LIST = 'bull_list'     # 无序列表
+    TOGGLE_LIST = 'toggle_list'     # 折叠列表
+    CODE = 'code'       # 代码块
+    IMAGE = 'image'     # 图片
+    QUOTE = 'quote'     # 引用 (markdown 中的 >)
+    TEXT = 'text'       # 文本
+    BOOKMARK = 'bookmark'   # 书签
+    DIVIDER = 'divider'     # 分割线
+    TABLE = 'table'  # 表格
+
+
+# 整个大 Block 的内容中，每个 content 的类型，支持外链 link
+class BlockContentType:
+    BOLD = 'bold'       # 加粗文本
+    INLINE_CODE = 'inline_code'     # 行内代码
+    TEXT = 'text'       # 普通文本
+```
+
 ## 🗳️ Database Row(Page) Convert
 
-Database 的 property 可以直接导出为 csv，然后 import 进 Notion 即可。
-
-本工具主要是支持 Database 中每一行，即 Page 中的内容的转换。
-
-下面这个 LeetCode 刷题记录 Database 的转换结果：
-- Wolai：https://www.wolai.com/aruni/fKuL9hqz8MhXqvcHrn31uF
-- Notion：https://aarynlu.notion.site/LeetCode-5e748f5f012743ae97b12a93908c9e58?pvs=4
+Database 的 property 可以直接导出为 csv，然后 import 进 Notion，row 中的内容可以使用本工具转换。
 
 ### Usage
 

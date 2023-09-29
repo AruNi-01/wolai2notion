@@ -16,7 +16,8 @@ class Database(WolaiBase):
             "Authorization": self.token
         }
         url = self.base_url + "databases/" + database_id
-        response = requests.get(url, headers=headers)
+        print(f'get wolai database rows, request url: {url}')
+        response = requests.get(url, headers=headers, timeout=10)
 
         if response.status_code != 200:
             raise ValueError("Request failed with status code:" + str(response.status_code))

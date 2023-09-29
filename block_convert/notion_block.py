@@ -14,6 +14,7 @@ class NotionBlockType:
     PARAGRAPH = 'paragraph'  # 文本段落
     BOOKMARK = 'bookmark'  # 书签
     DIVIDER = 'divider'  # 分割线
+    TABLE = 'table'  # 表格
 
 
 # 整个大 Block 的内容中，每个 content 的类型
@@ -56,24 +57,18 @@ def get_block_type_from_wolai(wolai_block_type, attach_info):
         return NotionBlockType.BOOKMARK
     if wolai_block_type == WolaiBlockType.DIVIDER:
         return NotionBlockType.DIVIDER
+    if wolai_block_type == WolaiBlockType.SIMPLE_TABLE:
+        return NotionBlockType.TABLE
 
 
 def get_code_language_from_wolai(wolai_code_language):
-    if wolai_code_language == "text":   # wolai 中的 text 对应 notion 中的 plain text
-        return "plain text"
-    else:
-        return wolai_code_language.lower()   # notion 中的 code language 全是小写
+    # wolai 中的 text 对应 notion 中的 plain text；notion 中的 code language 全是小写
+    return "plain text" if wolai_code_language == "text" else wolai_code_language.lower()
 
 
 def rich_text_item_is_bold(wolai_block_content_type):
-    if wolai_block_content_type == WolaiBlockContentType.BOLD:
-        return True
-    else:
-        return False
+    return True if wolai_block_content_type == WolaiBlockContentType.BOLD else False
 
 
 def rich_text_item_is_code(wolai_block_content_type):
-    if wolai_block_content_type == WolaiBlockContentType.INLINE_CODE:
-        return True
-    else:
-        return False
+    return True if wolai_block_content_type == WolaiBlockContentType.INLINE_CODE else False

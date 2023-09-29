@@ -1,10 +1,10 @@
-import json
 from concurrent.futures import ThreadPoolExecutor
 
-from block_convert.wolai_block import WolaiBlockType, WolaiBlockContentType, WolaiBlockContent
+from block_convert.wolai_block import WolaiBlockType
 from block_convert import notion_block
 
 from notion.database import Database as NotionDatabase
+from run import common
 from utils import utils, oss_client
 from wolai.block import Block as WolaiBlock
 
@@ -33,7 +33,9 @@ def start_convert():
     need_oss = input('是否需要将 wolai 的图片上传至 oss，notion 直接访问 oss (y/n): ')
     if need_oss == 'y':
         oss = oss_client.OssClient()
-        print('已开启 oss 上传图片功能')
+        print('✅ 已开启 oss 上传图片功能')
+    else:
+        print('❌ 未开启 oss 上传图片功能')
 
     # 写 csv 文件表头
     utils.write_csv_row_with_convert_res(list_item=["wolai_page_id", "wolai_page_title", "top_block"])
@@ -49,7 +51,7 @@ def start_convert():
                 break
 
             parent_block_id_stack = []  # 由于是由父到子递归的插入 block，因此使用 stack 来记录上一个 block 的 id
-            parent_block_id = None  # 当前 block 的 parent_block_id
+            parent_block_id = notion.rows[idx].page_id  # 当前 block 的 parent_block_id
 
             # 提交任务到线程池
             future = t.submit(lambda: block_handle(wolai.rows[idx].page_id, idx,
@@ -63,8 +65,8 @@ def start_convert():
     t.shutdown(wait=True)  # 等待所有子线程执行完毕
 
 
-def block_handle(block_id, page_match_idx, parent_block_id_stack, parent_block_id,
-                 is_from_page=False, handle_children=False):
+def block_handle(block_id, page_match_idx, parent_block_id_stack,
+                 parent_block_id, is_from_page=False, handle_children=False):
     """
     递归处理 block，将 block 转换为 notion 中的 block
     :param block_id: 当前处理的 block 的 id
@@ -75,57 +77,41 @@ def block_handle(block_id, page_match_idx, parent_block_id_stack, parent_block_i
     :param handle_children: 为 True 时说明是处理 block 的子 block
     :return:
     """
-
     if is_from_page:
         block_list = wolai.get_block_list_from_page(block_id)
     else:
         block_list = wolai.get_block_list_from_block(block_id)
 
+    idx, total = 0, len(block_list)
     for block in block_list:
-        attach_info, has_children = None, False
-        # wolai block 类型
-        if block.type == WolaiBlockType.HEADING:
-            attach_info = {
-                "level": block.level
-            }
-            if block.toggle:
-                attach_info['toggle'] = block.toggle
-        if block.type == WolaiBlockType.CODE:
-            attach_info = block.language
-        if block.type == WolaiBlockType.BOOKMARK:
-            attach_info = block.url
-        if block.type == WolaiBlockType.IMAGE:
-            attach_info = block.url
-        if block.children_ids:
-            has_children = True
+        attach_info = common.get_attach_info(block)
 
-        wolai_block_content_list = []
-        # wolai block 内容
-        for text in block.content:
-            new_block = WolaiBlockContent()
-            # 注意：先判断 bold, inline_code 等是否存在，因为普通的 text，没有这些字段
-            if 'bold' in text and text['bold'] is True:
-                new_block.content_type = WolaiBlockContentType.BOLD
-            elif 'inline_code' in text and text['inline_code'] is True:
-                new_block.content_type = WolaiBlockContentType.INLINE_CODE
-            else:
-                new_block.content_type = WolaiBlockContentType.TEXT
-            new_block.content = text['title']
-            wolai_block_content_list.append(new_block)
+        wolai_block_content_list = common.get_wolai_block_content_list(block)
 
-        insert_notion_block(block.type, wolai_block_content_list, attach_info,
+        # table 内容处理
+        wolai_table_content_list = []
+        if block.type == WolaiBlockType.SIMPLE_TABLE:
+            wolai_table_content_list = common.get_wolai_table_content_list(block)
+
+        idx += 1
+        print(f'page title【{notion.rows[page_match_idx].title}】，正在处理第 {idx} 个子 block，总共 {total} 个')
+        insert_notion_block(block.type, wolai_block_content_list, wolai_table_content_list, attach_info,
                             handle_children, block.children_ids, page_match_idx, parent_block_id_stack, parent_block_id)
 
 
-def insert_notion_block(wolai_block_type, wolai_block_content_list, attach_info, handle_children, wolai_children_ids,
-                        page_match_idx, parent_block_id_stack, parent_block_id):
+def insert_notion_block(wolai_block_type, wolai_block_content_list, wolai_table_content_list, attach_info,
+                        handle_children, wolai_children_ids, page_match_idx, parent_block_id_stack, parent_block_id):
     """
     向 notion 中插入 block，
     :param wolai_block_type: block 类型
     :param wolai_block_content_list: block 内容 list
+    :param wolai_table_content_list: table 内容 list，仅当 block 类型为 table 时有值
     :param attach_info: 附加信息：
                 · 当 wolai_block_type 为 heading 时，attach_info 是一个 dict，level 是 header 的级别；且当 toggle 不为 None 时 header 可折叠
-                · 当 block.type 为 code 时，attach_info 为代码语言...
+                · 当 block.type 为 code 时，attach_info 为代码语言
+                · 当 block.type 为 bookmark 时，attach_info 为其 url 地址
+                · 当 block.type 为 image 时，attach_info 为其 url 地址
+                · 当 block.type 为 table 时，attach_info 为其是否有表头
     :param handle_children: 是否处理子 block
     :param wolai_children_ids: 子 block 的 id list
     :param page_match_idx: 用于获取 page，匹配 wolai 和 notion page 的 title 是否一致
@@ -133,67 +119,24 @@ def insert_notion_block(wolai_block_type, wolai_block_content_list, attach_info,
     :param parent_block_id: 当前 block 的 parent_block_id
     :return:
     """
-
-    children = []  # 调用 notion API 时的参数，用于插入子 block
-
-    notion_block_type = notion_block.get_block_type_from_wolai(wolai_block_type, attach_info)
-
     # 判断 title 是否匹配
     notion_page, wolai_page = notion.rows[page_match_idx], wolai.rows[page_match_idx]
     if notion_page.title != wolai_page.title:
         raise f'wolai_page: {wolai_page.title} 与 notion_page: {notion_page.title} 不匹配'
 
-    # 构建 rich_text 参数
-    rich_text_list = []
-    for wolai_block_content in wolai_block_content_list:
-        rich_text_item = {
-            "type": "text",
-            "text": {
-                "content": wolai_block_content.content
-            },
-            "annotations": {
-                "bold": notion_block.rich_text_item_is_bold(wolai_block_content.content_type),
-                "code": notion_block.rich_text_item_is_code(wolai_block_content.content_type),
-            }
-        }
-        rich_text_list.append(rich_text_item)
+    notion_block_type = notion_block.get_block_type_from_wolai(wolai_block_type, attach_info)
 
-    # 构建 children 参数
-    children_item = {
-        "type": notion_block_type,
-        notion_block_type: {
-            "rich_text": rich_text_list
-        }
-    }
-
-    # 当 attach_info 有 toggle 字段时，设置为可折叠
-    if attach_info is not None and 'toggle' in attach_info and attach_info['toggle'] is True:
-        children_item[notion_block_type]['is_toggleable'] = True
-
-    # 根据 block 类型，添加/删除不同的属性
-    if notion_block_type == notion_block.NotionBlockType.CODE:
-        children_item[notion_block_type]['language'] = notion_block.get_code_language_from_wolai(attach_info)
-    if notion_block_type == notion_block.NotionBlockType.BOOKMARK:
-        del children_item[notion_block_type]['rich_text']  # bookmark 类型的 block 不需要 rich_text
-        children_item[notion_block_type]['url'] = attach_info
-    if notion_block_type == notion_block.NotionBlockType.DIVIDER:
-        del children_item[notion_block_type]['rich_text']  # divider 类型的 block 不需要 rich_text
-    if notion_block_type == notion_block.NotionBlockType.IMAGE:  # image 类型的 block 需要设置为 external 类型
-        if oss is not None:
-            attach_info = oss.upload_remote_image(attach_info)
-        del children_item[notion_block_type]['rich_text']
-        children_item[notion_block_type]['type'] = 'external'
-        children_item[notion_block_type]['external'] = {
-            "url": attach_info
-        }
-
-    children.append(children_item)
-
-    # 一级标题的 parent_block_id 为 notion_page.page_id，其他的 parent_block_id 都是上一个 block 的 id
-    if notion_block_type == notion_block.NotionBlockType.HEADING_1:
-        parent_block_id = notion_page.page_id
     if handle_children:  # 当处理子 block 时，parent_block_id 为上一个 block 的 id
         parent_block_id = parent_block_id_stack[-1]
+
+    # table 类型的 block 特殊处理
+    if notion_block_type == notion_block.NotionBlockType.TABLE:
+        common.insert_table_block(wolai_table_content_list, attach_info, notion_block_type, notion, parent_block_id)
+        return  # table 类型的 block 处理完毕，直接返回
+
+    children_item = common.build_children_item(notion_block_type, wolai_block_content_list, attach_info, oss)
+
+    children = [children_item]  # 调用 notion API 时的参数，用于插入子 block
 
     try:
         response = notion.blocks.children.append(

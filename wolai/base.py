@@ -12,6 +12,10 @@ class WolaiBase(object):
         self.token = self.init_token()
 
     def init_token(self):
+        # token cache
+        if os.getenv('wolai_token') is not None:
+            return os.getenv('wolai_token')
+
         config = utils.get_conf_data()
         self._app_id = config["wolai"]["base_info"]["app_id"]
         self._app_secret = config["wolai"]["base_info"]["app_secret"]
@@ -25,7 +29,9 @@ class WolaiBase(object):
             if response.status_code != 200:
                 raise ValueError("Request failed with status code:" + str(response.status_code))
 
-            return response.json()["data"]["app_token"]
+            token = response.json()["data"]["app_token"]
+            os.environ['wolai_token'] = token
+            return token
 
     @staticmethod
     def get_database_id():

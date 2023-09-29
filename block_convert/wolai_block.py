@@ -10,6 +10,7 @@ class WolaiBlockType:
     TEXT = 'text'       # 文本
     BOOKMARK = 'bookmark'   # 书签
     DIVIDER = 'divider'     # 分割线
+    SIMPLE_TABLE = 'simple_table'   # 简单表格
 
 
 # 整个大 Block 的内容中，每个 content 的类型
@@ -23,3 +24,4 @@ class WolaiBlockContent(object):
     def __init__(self):
         self.content_type = None
         self.content = None
+        self.link = None
