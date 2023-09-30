@@ -90,7 +90,7 @@ Database 的 property 可以直接导出为 csv，然后 import 进 Notion，row
 
 ## 📑 Page Import
 
-由于 Notion API 提供的 Create Page 接口必须要选定一个 Page 或者 Database 作为 parent（或许是我没找到直接创建新 Page 的接口），所以需要先在 Notion 新建一个页面，然后需要导入的 Wolai Page 都会导入到这个 parent 页面下，导入完成后再手动移动到 Workspace 下即可。
+由于 Notion API 提供的 Create Page 接口必须要选定一个 Page 或者 Database 作为 parent（或许是我没找到直接创建新 Page 的接口），所以需要先在 Notion 新建一个页面（别忘了将 Integration 添加到该页面的 Connections 中），然后需要导入的 Wolai Page 都会导入到这个 parent 页面下，导入完成后再手动移动到 Workspace 下即可。
    
 ### Usage
 
