@@ -16,6 +16,7 @@ class Block(Database):
         self.url = None     # 如果 type 是 bookmark, image 类型，则 url 为其 url 地址，否则无此字段
         self.table_has_header = None    # 如果 type 是 table 类型，则 table_has_header 为其是否有表头，否则无此字段
         self.table_content = [[]]     # 如果 type 是 table 类型，则 table_content 为其表格内容（二维数组），否则无此字段
+        self.icon = None    # 如果 type 是 callout 等有 icon 的类型，则 icon 为其图标，否则无此字段
 
     def get_block_list_from_page(self, page_id):
         return self.get_block_list(page_id, True)
@@ -65,6 +66,8 @@ class Block(Database):
             if block.type == WolaiBlockType.SIMPLE_TABLE:
                 block.table_has_header = json_block['table_setting']['has_header']
                 block.table_content = json_block['table_content']
+            if block.type == WolaiBlockType.CALLOUT:
+                block.icon = json_block['icon']['icon']
             block_list.append(block)
 
         return block_list

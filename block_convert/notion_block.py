@@ -15,6 +15,7 @@ class NotionBlockType:
     BOOKMARK = 'bookmark'  # 书签
     DIVIDER = 'divider'  # 分割线
     TABLE = 'table'  # 表格
+    CALLOUT = 'callout'  # 标注框
 
 
 # 整个大 Block 的内容中，每个 content 的类型
@@ -59,6 +60,8 @@ def get_block_type_from_wolai(wolai_block_type, attach_info):
         return NotionBlockType.DIVIDER
     if wolai_block_type == WolaiBlockType.SIMPLE_TABLE:
         return NotionBlockType.TABLE
+    if wolai_block_type == WolaiBlockType.CALLOUT:
+        return NotionBlockType.CALLOUT
 
 
 def get_code_language_from_wolai(wolai_code_language):

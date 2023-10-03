@@ -25,6 +25,7 @@ class BlockType:
     BOOKMARK = 'bookmark'   # 书签
     DIVIDER = 'divider'     # 分割线
     TABLE = 'table'  # 表格
+    CALLOUT = 'callout'       # 标注框
 
 
 # 整个大 Block 的内容中，每个 content 的类型，支持外链 link

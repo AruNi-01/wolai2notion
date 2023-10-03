@@ -3,6 +3,11 @@ from block_convert.wolai_block import WolaiBlockType, WolaiBlockContent, WolaiBl
 
 
 def get_wolai_table_content_list(block):
+    """
+    获取 table block 的内容
+    :param block: 表格
+    :return:
+    """
     wolai_table_content_list = []
     # table_content 是二维数组，需要转换为 wolai_block_content_list
     for row in block.table_content:
@@ -18,6 +23,15 @@ def get_wolai_table_content_list(block):
 
 
 def insert_table_block(wolai_table_content_list, attach_info, notion_block_type, notion, parent_block_id):
+    """
+    插入 table block
+    :param wolai_table_content_list:
+    :param attach_info:
+    :param notion_block_type:
+    :param notion:
+    :param parent_block_id:
+    :return:
+    """
     children, row_children = [], []
     # 构建 table 的内容，notion 中 table 的每一行是一个 type 为 table_row 的 block，行的内容是 table_row 中的 cells 数组
     for row in wolai_table_content_list:
@@ -79,6 +93,11 @@ def insert_table_block(wolai_table_content_list, attach_info, notion_block_type,
 
 
 def get_attach_info(block):
+    """
+    获取 block 的附加信息
+    :param block:
+    :return:
+    """
     attach_info = None
     # wolai block 类型
     if block.type == WolaiBlockType.HEADING:
@@ -95,10 +114,17 @@ def get_attach_info(block):
         attach_info = block.url
     if block.type == WolaiBlockType.SIMPLE_TABLE:
         attach_info = block.table_has_header
+    if block.type == WolaiBlockType.CALLOUT:
+        attach_info = block.icon
     return attach_info
 
 
 def get_wolai_block_content_list(block):
+    """
+    获取 block 中的内容
+    :param block:
+    :return:
+    """
     wolai_block_content_list = []
     # wolai block 内容
     for text in block.content:
@@ -107,6 +133,14 @@ def get_wolai_block_content_list(block):
 
 
 def build_children_item(notion_block_type, wolai_block_content_list, attach_info, oss):
+    """
+    构建 notion block 的 children 参数
+    :param notion_block_type:
+    :param wolai_block_content_list:
+    :param attach_info:
+    :param oss:
+    :return:
+    """
     # 构建 rich_text 参数
     rich_text_list = []
     for wolai_block_content in wolai_block_content_list:
@@ -157,11 +191,21 @@ def build_children_item(notion_block_type, wolai_block_content_list, attach_info
         children_item[notion_block_type]['external'] = {
             "url": attach_info
         }
+    if notion_block_type == notion_block.NotionBlockType.CALLOUT:
+        children_item[notion_block_type]['icon'] = {
+            "type": "emoji",
+            "emoji": attach_info
+        }
 
     return children_item
 
 
 def _build_new_block(text):
+    """
+    构建新的 block
+    :param text:
+    :return:
+    """
     new_block = WolaiBlockContent()
     # 注意：先判断 bold, inline_code 等是否存在，因为普通的 text，没有这些字段
     if 'bold' in text and text['bold'] is True:
