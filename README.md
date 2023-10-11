@@ -134,3 +134,28 @@ python ./run/import_page.py
     "status_code": 429
 }
 ```
+
+### ModuleNotFoundError: No module named 'xxx'
+
+错误信息：
+```shell
+➜  wolai2notion git:(master) ✗ python3 ./run/convert_database_row.py
+Traceback (most recent call last):
+  File "/root/python/wolai2notion/./run/convert_database_row.py", line 3, in <module>
+    from block_convert.wolai_block import WolaiBlockType
+ModuleNotFoundError: No module named 'block_convert'
+```
+
+原因：在终端运行时，Python 解释器默认不会去寻找项目根目录下的 module，所以导致找不到自定义 module
+
+解决办法有两种：
+
+- 在待运行的 python 文件中添加项目根目录到系统 path 中：
+  ```python
+  import sys
+  sys.path.append('/home/python/project')
+  ```
+- 添加环境变量：
+  ```shell
+  export PYTHONPATH=$PYTHONPATH:/home/python/project
+  ```

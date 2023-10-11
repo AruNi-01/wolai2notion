@@ -12,6 +12,7 @@ class Database(NotionBase):
         self.rows.append(row)
 
     def get_all_rows(self, database_id):
+        print(f'🔍 获取 notion_database 数据 🔍，database_id: {database_id}')
         while True:
             try:
                 json_page = self.databases.query(

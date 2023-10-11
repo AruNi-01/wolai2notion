@@ -16,7 +16,7 @@ class Database(WolaiBase):
             "Authorization": self.token
         }
         url = self.base_url + "databases/" + database_id
-        print(f'get wolai database rows, request url: {url}')
+        print(f'🔍 获取 wolai_database 数据 🔍, request url: {url}')
         response = requests.get(url, headers=headers, timeout=10)
 
         if response.status_code != 200:
