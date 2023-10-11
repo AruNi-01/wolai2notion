@@ -27,6 +27,8 @@ class Database(NotionBase):
                 raise e
 
             for row in json_page["results"]:
+                if row["properties"]["\ufeffTitle"]["title"] == []:
+                    continue
                 one_row = Page()
                 one_row.page_id = row["id"]
                 one_row.title = row["properties"]["\ufeffTitle"]["title"][0]["plain_text"]
