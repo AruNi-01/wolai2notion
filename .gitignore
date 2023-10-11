@@ -12,5 +12,5 @@ dist/
 .venv
 Pipfile
 
-csv_result
+csv_result/*
 conf/conf.yml
