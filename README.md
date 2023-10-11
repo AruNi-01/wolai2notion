@@ -45,7 +45,7 @@ Database 的 property 可以直接导出为 csv，然后 import 进 Notion，row
     ```shell
     pip install -r requirements.txt
     ```
-2. 填写配置文件 `conf/conf.yml`：
+2. 填写配置文件 `conf/conf.yml`，copy conf.yml.bak 为 conf.yml（不会 push 到 git 仓库），再进行填写：
     ```yml
    wolai:
      base_info:

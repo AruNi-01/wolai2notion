@@ -13,3 +13,4 @@ dist/
 Pipfile
 
 csv_result
+conf/conf.yml
