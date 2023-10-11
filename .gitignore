@@ -13,5 +13,5 @@ dist/
 Pipfile
 
 csv_result/*
-!csv_result/
+!csv_result/.gitkeep
 conf/conf.yml
