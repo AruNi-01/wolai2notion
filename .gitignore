@@ -13,4 +13,5 @@ dist/
 Pipfile
 
 csv_result/*
+!csv
 conf/conf.yml
