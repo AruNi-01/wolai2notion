@@ -82,6 +82,7 @@ Database 的 property 可以直接导出为 csv，然后 import 进 Notion，row
     ```shell
     python ./run/convert_database_row.py
     ```
+    若是在终端而非 IDE 运行，可能会出现 ModuleNotFoundError，解决方法在 [Questions](https://github.com/AruNi-01/wolai2notion#modulenotfounderror-no-module-named-xxx)。
 4. 运行时，会先填入需要转换的起始和结束的 idx，这个 idx 是 database 所有 row 经过 title 排序后数组的 idx，所以运行前最好先去 test 文件中看看 database rows 的 title 排序，然后填入对应的 idx。
    示例：
    ```text

@@ -39,7 +39,7 @@ def start_convert():
 
     # 写 csv 文件表头
     utils.write_csv_row_with_convert_res(list_item=["wolai_page_id", "wolai_page_title", "top_block"])
-    utils.write_csv_row_with_convert_process(list_item=["converted_rows", "total_rows"])
+    utils.write_csv_row_with_convert_process(list_item=["row_idx(start_with_0)", "row_title", "total_idx(total_rows-1)"])
 
     max_workers = int(
         input('请输入线程池的最大线程数 (根据电脑 CPU 逻辑核数，并发执行控制台日志和 csv 数据会混乱，串行执行输入 1): '))
@@ -60,7 +60,7 @@ def start_convert():
                 raise future.exception()
 
             utils.write_csv_row_with_convert_res(list_item=["", "", ""])  # 写空行，用于分割不同的 database_row
-            utils.write_csv_row_with_convert_process(list_item=[idx + 1, len(wolai.rows)])  # 写进度
+            utils.write_csv_row_with_convert_process(list_item=[idx, wolai.rows[idx].title, len(wolai.rows)])  # 写进度
 
     t.shutdown(wait=True)  # 等待所有子线程执行完毕
 
