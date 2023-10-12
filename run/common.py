@@ -176,12 +176,12 @@ def build_children_item(notion_block_type, wolai_block_content_list, attach_info
         children_item[notion_block_type]['is_toggleable'] = True
 
     # 根据 block 类型，添加/删除不同的属性
-    if notion_block_type == notion_block.NotionBlockType.CODE:
+    if notion_block_type == notion_block.NotionBlockType.CODE:  # 代码块
         children_item[notion_block_type]['language'] = notion_block.get_code_language_from_wolai(attach_info)
-    if notion_block_type == notion_block.NotionBlockType.BOOKMARK:
+    if notion_block_type == notion_block.NotionBlockType.BOOKMARK:  # 书签
         del children_item[notion_block_type]['rich_text']  # bookmark 类型的 block 不需要 rich_text
         children_item[notion_block_type]['url'] = attach_info
-    if notion_block_type == notion_block.NotionBlockType.DIVIDER:
+    if notion_block_type == notion_block.NotionBlockType.DIVIDER:   # 分割线
         del children_item[notion_block_type]['rich_text']  # divider 类型的 block 不需要 rich_text
     if notion_block_type == notion_block.NotionBlockType.IMAGE:  # image 类型的 block 需要设置为 external 类型
         if oss is not None:
@@ -191,11 +191,14 @@ def build_children_item(notion_block_type, wolai_block_content_list, attach_info
         children_item[notion_block_type]['external'] = {
             "url": attach_info
         }
-    if notion_block_type == notion_block.NotionBlockType.CALLOUT:
+    if notion_block_type == notion_block.NotionBlockType.CALLOUT:   # 标注框
         children_item[notion_block_type]['icon'] = {
             "type": "emoji",
             "emoji": attach_info
         }
+    if notion_block_type == notion_block.NotionBlockType.EQUATION:  # 公式
+        del children_item[notion_block_type]['rich_text']
+        children_item[notion_block_type]['expression'] = wolai_block_content_list[0].content
 
     return children_item
 

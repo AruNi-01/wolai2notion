@@ -10,7 +10,8 @@ Wolai 是直接使用官方提供的 [API](https://www.wolai.com/wolai/7FB9PLeqZ
 - [x] image/file 上传至 oss，然后替换 url（[Notion API 暂时不支持上传 file 到 Notion](https://developers.notion.com/reference/file-object)）
 - [x] 纯 Page 的导入
 
-支持的 Block、Block 内的 Content 类型：
+支持的 Block、Block 内的 Content 类型（[Wolai Block Type](https://www.wolai.com/wolai/uKwoVabBPqLniFDN6BgRN9)｜[Notion Block Type](https://developers.notion.com/reference/block#block-type-objects)）：
+
 ```python
 # Block Type
 class BlockType:
@@ -26,6 +27,7 @@ class BlockType:
     DIVIDER = 'divider'     # 分割线
     TABLE = 'table'  # 表格
     CALLOUT = 'callout'       # 标注框
+    BLOCK_EQUATION = 'block_equation'   # 公式
 
 
 # 整个大 Block 的内容中，每个 content 的类型，支持外链 link

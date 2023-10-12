@@ -16,6 +16,7 @@ class NotionBlockType:
     DIVIDER = 'divider'  # 分割线
     TABLE = 'table'  # 表格
     CALLOUT = 'callout'  # 标注框
+    EQUATION = 'equation'   # 公式
 
 
 # 整个大 Block 的内容中，每个 content 的类型
@@ -62,6 +63,8 @@ def get_block_type_from_wolai(wolai_block_type, attach_info):
         return NotionBlockType.TABLE
     if wolai_block_type == WolaiBlockType.CALLOUT:
         return NotionBlockType.CALLOUT
+    if wolai_block_type == WolaiBlockType.BLOCK_EQUATION:
+        return NotionBlockType.EQUATION
 
 
 def get_code_language_from_wolai(wolai_code_language):
