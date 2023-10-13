@@ -33,7 +33,7 @@ class OssClient(object):
         file_suffix = file_name.split('.')[-1]
         file_name = file_name.split('.')[0] + '_' + datetime.now().strftime("%Y%m%d-%H:%M:%S:%f") + '.' + file_suffix
 
-        self._upload_image(file_name, local_file_path)
+        return self._upload_image(file_name, local_file_path)
 
     def upload_remote_image(self, remote_file_url):
         """
@@ -54,7 +54,7 @@ class OssClient(object):
         # 生成唯一的文件名
         file_name = str(uuid.uuid4()) + '_' + datetime.now().strftime("%Y%m%d%H%M%S") + extension
 
-        self._upload_image(file_name, image_content)
+        return self._upload_image(file_name, image_content)
 
     def _upload_image(self, file_name, image_path_or_content):
         oss_file_path = utils.utils.get_conf_data()['oss']['upload_info']['oss_file_path']

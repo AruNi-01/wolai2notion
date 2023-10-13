@@ -9,6 +9,7 @@ Wolai 是直接使用官方提供的 [API](https://www.wolai.com/wolai/7FB9PLeqZ
   - [x] 并发转换，提高 rows 过多时的转换速度，但 log 和 csv 会混乱
 - [x] image/file 上传至 oss，然后替换 url（[Notion API 暂时不支持上传 file 到 Notion](https://developers.notion.com/reference/file-object)）
 - [x] 纯 Page 的导入
+- [ ] [Wolai 行内引用、嵌入引用、页面引用](https://www.wolai.com/wolai/i1eTuzCbCDV4ymqaDPRN5w)（理论上可以用 Notion 的 Sync Block 和 Link To Page 实现，但无法保证原 Block 一定比该引用先创建，因此暂且搁置）
 
 支持的 Block、Block 内的 Content 类型（[Wolai Block Type](https://www.wolai.com/wolai/uKwoVabBPqLniFDN6BgRN9)｜[Notion Block Type](https://developers.notion.com/reference/block#block-type-objects)）：
 

@@ -132,7 +132,8 @@ def insert_notion_block(wolai_block_type, wolai_block_content_list, wolai_table_
 
     # table 类型的 block 特殊处理
     if notion_block_type == notion_block.NotionBlockType.TABLE:
-        common_notion.insert_table_block(wolai_table_content_list, attach_info, notion_block_type, notion, parent_block_id)
+        common_notion.insert_table_block(wolai_table_content_list, attach_info,
+                                         notion_block_type, notion, parent_block_id)
         return  # table 类型的 block 处理完毕，直接返回
 
     children_item = common_notion.build_children_item(notion_block_type, wolai_block_content_list, attach_info, oss)
