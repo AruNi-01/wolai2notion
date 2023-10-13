@@ -4,9 +4,10 @@ from block_convert.wolai_block import WolaiBlockType
 from block_convert import notion_block
 
 from notion.page import Page as NotionPage
-from run import common
 from wolai.block import Block as WolaiBlock
 from wolai.page import Page as WolaiPage
+
+from common import common_notion, common_wolai
 from utils import oss_client
 
 wolai = WolaiBlock()
@@ -66,14 +67,14 @@ def block_handle(block_id, parent_block_id_stack, parent_block_id, is_from_page=
 
     idx, total = 0, len(block_list)
     for block in block_list:
-        attach_info = common.get_attach_info(block)
+        attach_info = common_wolai.get_attach_info(block)
 
-        wolai_block_content_list = common.get_wolai_block_content_list(block)
+        wolai_block_content_list = common_wolai.get_wolai_block_content_list(block)
 
         # table 内容处理
         wolai_table_content_list = []
         if block.type == WolaiBlockType.SIMPLE_TABLE:
-            wolai_table_content_list = common.get_wolai_table_content_list(block)
+            wolai_table_content_list = common_wolai.get_wolai_table_content_list(block)
 
         idx += 1
         print(f'page title【{notion.title}】，正在处理第 {idx} 个子 block，总共 {total} 个')
@@ -108,10 +109,10 @@ def insert_notion_block(wolai_block_type, wolai_block_content_list, wolai_table_
 
     # table 类型的 block 特殊处理
     if notion_block_type == notion_block.NotionBlockType.TABLE:
-        common.insert_table_block(wolai_table_content_list, attach_info, notion_block_type, notion, parent_block_id)
+        common_notion.insert_table_block(wolai_table_content_list, attach_info, notion_block_type, notion, parent_block_id)
         return  # table 类型的 block 处理完毕，直接返回
 
-    children_item = common.build_children_item(notion_block_type, wolai_block_content_list, attach_info, oss)
+    children_item = common_notion.build_children_item(notion_block_type, wolai_block_content_list, attach_info, oss)
 
     children = [children_item]  # 调用 notion API 时的参数，用于插入子 block
     try:
