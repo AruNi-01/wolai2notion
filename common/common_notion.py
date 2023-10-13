@@ -16,26 +16,7 @@ def insert_table_block(wolai_table_content_list, attach_info, notion_block_type,
     for row in wolai_table_content_list:
         cells = []
         for cell in row:
-            cell_content = []
-            for text in cell:
-                cell_content_item = {
-                    "type": "text",
-                    "text": {
-                        "content": text.content,
-                        **(
-                            {
-                                "link": {
-                                    "url": text.link
-                                }
-                            } if text.link is not None else {}
-                        ),
-                    },
-                    "annotations": {
-                        "bold": notion_block.rich_text_item_is_bold(text.content_type),
-                        "code": notion_block.rich_text_item_is_code(text.content_type),
-                    }
-                }
-                cell_content.append(cell_content_item)
+            cell_content = _build_rich_text_or_table_cell_content(table_cell=cell)
             cells.append(cell_content)
 
         row_item = {
@@ -81,26 +62,7 @@ def build_children_item(notion_block_type, wolai_block_content_list, attach_info
     :return:
     """
     # 构建 rich_text 参数
-    rich_text_list = []
-    for wolai_block_content in wolai_block_content_list:
-        rich_text_item = {
-            "type": "text",
-            "text": {
-                "content": wolai_block_content.content,
-                **(
-                    {
-                        "link": {
-                            "url": wolai_block_content.link
-                        }
-                    } if wolai_block_content.link is not None else {}
-                ),
-            },
-            "annotations": {
-                "bold": notion_block.rich_text_item_is_bold(wolai_block_content.content_type),
-                "code": notion_block.rich_text_item_is_code(wolai_block_content.content_type),
-            }
-        }
-        rich_text_list.append(rich_text_item)
+    rich_text_list = _build_rich_text_or_table_cell_content(block_content_list=wolai_block_content_list)
 
     # 构建 children 参数
     children_item = {
@@ -140,3 +102,33 @@ def build_children_item(notion_block_type, wolai_block_content_list, attach_info
         children_item[notion_block_type]['expression'] = wolai_block_content_list[0].content
 
     return children_item
+
+
+def _build_rich_text_or_table_cell_content(block_content_list=None, table_cell=None):
+    """
+    构建 block_content 的 rich_text 或 表格的每一行内容
+    :param block_content_list:
+    :param table_cell:
+    :return: rich_text_list or table_cell_list
+    """
+    res_list = []
+    for cell_text_or_block_content in block_content_list if block_content_list is not None else table_cell:
+        item = {
+            "type": "text",
+            "text": {
+                "content": cell_text_or_block_content.content,
+                **(
+                    {
+                        "link": {
+                            "url": cell_text_or_block_content.link
+                        }
+                    } if cell_text_or_block_content.link is not None else {}
+                ),
+            },
+            "annotations": {
+                "bold": notion_block.rich_text_item_is_bold(cell_text_or_block_content.content_type),
+                "code": notion_block.rich_text_item_is_code(cell_text_or_block_content.content_type),
+            }
+        }
+        res_list.append(item)
+    return res_list
