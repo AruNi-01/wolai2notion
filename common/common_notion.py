@@ -112,7 +112,7 @@ def _build_rich_text_or_table_cell_content(block_content_list=None, table_cell=N
     :return: rich_text_list or table_cell_list
     """
     res_list = []
-    for cell_text_or_block_content in block_content_list if block_content_list is not None else table_cell:
+    for cell_text_or_block_content in (block_content_list if block_content_list is not None else table_cell):
         item = {
             "type": "text",
             "text": {
