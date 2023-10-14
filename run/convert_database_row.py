@@ -1,3 +1,5 @@
+import concurrent.futures
+import traceback
 from concurrent.futures import ThreadPoolExecutor
 
 from block_convert.wolai_block import WolaiBlockType
@@ -6,7 +8,7 @@ from block_convert import notion_block
 from notion.database import Database as NotionDatabase
 from wolai.block import Block as WolaiBlock
 
-from common import common_notion, common_wolai
+from common import common_notion, common_wolai, common, constants
 from utils import utils, oss_client
 
 wolai = WolaiBlock()
@@ -30,6 +32,9 @@ def start_convert():
     print(f'转换区间为 [{start_idx}, {end_idx}]，总计 {end_idx - start_idx + 1} 个，'
           f'从【{wolai.rows[start_idx].title}】开始, 到【{wolai.rows[end_idx].title}】结束')
 
+    exclude_str = input("请输入以上区间中需要排除转换的 idx，元素之间用空格分隔，若无排除的则按回车键: ")
+    exclude_list = [int(x) for x in exclude_str.split()]
+
     # 是否需要 oss 上传图片
     need_oss = input('是否需要将 wolai 的图片上传至 oss，notion 直接访问 oss (y/n): ')
     if need_oss == 'y':
@@ -40,13 +45,17 @@ def start_convert():
 
     # 写 csv 文件表头
     utils.write_csv_row_with_convert_res(list_item=["wolai_page_id", "wolai_page_title", "top_block"])
-    utils.write_csv_row_with_convert_process(list_item=["row_idx(start_with_0)", "row_title", "total_idx(total_rows-1)"])
+    convert_process_path = utils.write_csv_row_with_convert_process(list_item=["row_idx(start_with_0)",
+                                                                               "row_title(I'm_placeholder)",
+                                                                               "total_idx(total_rows-1)",
+                                                                               "convert_res"])
 
-    max_workers = int(
-        input('请输入线程池的最大线程数 (根据电脑 CPU 逻辑核数，并发执行控制台日志和 csv 数据会混乱，串行执行输入 1): '))
+    max_workers = int(input('请输入线程池的最大线程数 (根据 CPU 核数而定），'
+                            '并发执行控制台日志和 csv 数据会混乱，串行执行输入 1: '))
     with ThreadPoolExecutor(max_workers=max_workers) as t:
+        futures = {}
         for idx in range(len(wolai.rows)):
-            if idx < start_idx:
+            if idx < start_idx or idx in exclude_list:
                 continue
             if idx > end_idx:
                 break
@@ -57,13 +66,28 @@ def start_convert():
             # 提交任务到线程池
             future = t.submit(lambda: block_handle(wolai.rows[idx].page_id, idx,
                                                    parent_block_id_stack, parent_block_id, is_from_page=True))
-            if future.exception() is not None:
-                raise future.exception()
+            futures[future] = idx
 
-            utils.write_csv_row_with_convert_res(list_item=["", "", ""])  # 写空行，用于分割不同的 database_row
-            utils.write_csv_row_with_convert_process(list_item=[idx, wolai.rows[idx].title, len(wolai.rows)])  # 写进度
+    # 使用 as_completed，任务先完成的先返回
+    for future in concurrent.futures.as_completed(futures):
+        idx = futures[future]
+        try:
+            future.result()
+        except Exception as e:
+            print(f'❌ 转换失败 ❌，database_row idx【{idx}】, title【{wolai.rows[idx].title}】，原因: {e}')
+            utils.write_csv_row_with_convert_process(list_item=[idx, wolai.rows[idx].title,
+                                                                len(wolai.rows), constants.ConvertRes.FAIL])  # 写进度
+            traceback.print_exc()  # 打印异常堆栈信息
+            continue    # 不影响其他线程执行
+
+        print(f'✅ 转换成功 ✅，database_row idx【{idx}】, title【{wolai.rows[idx].title}】')
+        utils.write_csv_row_with_convert_res(list_item=["", "", ""])  # 写空行，用于分割不同的 database_row
+        utils.write_csv_row_with_convert_process(list_item=[idx, wolai.rows[idx].title,
+                                                            len(wolai.rows), constants.ConvertRes.SUCCESS])  # 写进度
 
     t.shutdown(wait=True)  # 等待所有子线程执行完毕
+
+    common.print_csv_process(convert_process_path)  # 打印 csv 进度文件
 
 
 def block_handle(block_id, page_match_idx, parent_block_id_stack,

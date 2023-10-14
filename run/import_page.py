@@ -1,3 +1,5 @@
+import concurrent
+import traceback
 from concurrent.futures import ThreadPoolExecutor
 
 from block_convert.wolai_block import WolaiBlockType
@@ -7,7 +9,7 @@ from notion.page import Page as NotionPage
 from wolai.block import Block as WolaiBlock
 from wolai.page import Page as WolaiPage
 
-from common import common_notion, common_wolai
+from common import common_notion, common_wolai, common
 from utils import oss_client
 
 wolai = WolaiBlock()
@@ -26,19 +28,38 @@ def start_import():
     else:
         print('❌ 未开启 oss 上传图片功能')
 
-    max_workers = int(
-        input('请输入线程池的最大线程数 (根据电脑 CPU 逻辑核数，并发执行控制台日志和 csv 数据会混乱，串行执行输入 1): '))
+    max_workers = int(input('请输入线程池的最大线程数 (根据 CPU 核数而定），'
+                            '并发执行控制台日志和 csv 数据会混乱，串行执行输入 1: '))
     with ThreadPoolExecutor(max_workers=max_workers) as t:
+        futures = {}
         for page_id in WolaiPage.get_import_page_ids():
             parent_block_id_stack = []  # 由于是由父到子递归的插入 block，因此使用 stack 来记录上一个 block 的 id
             parent_block_id = None  # 当前 block 的 parent_block_id
 
             # 提交任务到线程池
             future = t.submit(lambda: block_handle(page_id, parent_block_id_stack, parent_block_id, is_from_page=True))
-            if future.exception() is not None:
-                raise future.exception()
+            futures[future] = page_id
+
+    success_convert_page_dict = {}
+    failed_convert_page_dict = {}
+    # 使用 as_completed，任务先完成的先返回
+    for future in concurrent.futures.as_completed(futures):
+        page_id = futures[future]
+        wolai_page = WolaiPage().get_page_with_meta(page_id)
+        try:
+            future.result()
+        except Exception as e:
+            failed_convert_page_dict[page_id] = wolai_page.title
+            print(f'❌ 转换失败 ❌，wolai_page_id【{page_id}】，wolai_page_title【{wolai_page.title}】，原因: {e}')
+            traceback.print_exc()  # 打印异常堆栈信息
+            continue  # 不影响其他线程执行
+
+        success_convert_page_dict[page_id] = wolai_page.title
+        print(f'✅ 转换成功 ✅，wolai_page_id【{page_id}】，wolai_page_title【{wolai_page.title}】')
 
     t.shutdown(wait=True)  # 等待所有子线程执行完毕
+
+    common.print_page_convert_res(success_convert_page_dict, failed_convert_page_dict)
 
 
 def block_handle(block_id, parent_block_id_stack, parent_block_id, is_from_page=False, handle_children=False):

@@ -62,7 +62,12 @@ class Block(Database):
             if block.type == WolaiBlockType.BOOKMARK:
                 block.url = json_block['bookmark_source']
             if block.type == WolaiBlockType.IMAGE:
-                block.url = json_block['media']['download_url']
+                if json_block['media']['type'] == 'internal':
+                    block.url = json_block['media']['download_url']
+                elif json_block['media']['type'] == 'external':
+                    block.url = json_block['media']['url']
+                else:
+                    raise ValueError("media type is not internal or external")
             if block.type == WolaiBlockType.SIMPLE_TABLE:
                 block.table_has_header = json_block['table_setting']['has_header']
                 block.table_content = json_block['table_content']
