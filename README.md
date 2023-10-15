@@ -1,6 +1,7 @@
 # 🎭 Wolai Convert To Notion
 
 ![demo](docs/img/demo.gif)
+ps: 转换失败的 row 是由 [Wolai API 调用频率限制](https://github.com/AruNi-01/wolai2notion#wolai-api-%E8%B0%83%E7%94%A8%E9%A2%91%E7%8E%87%E9%99%90%E5%88%B6) 导致。
 
 ## 📖 Introduction
 
