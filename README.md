@@ -1,5 +1,9 @@
 # 🎭 Wolai Convert To Notion
 
+![demo](docs/img/demo.gif)
+
+## 📖 Introduction
+
 由于 Wolai 被钉钉收购后，并未支持 Wolai 与钉钉的同步，而且官方对 Wolai 的更新频率大大降低，所以还是决定把 Wolai 的数据转移到 Notion 里。
 
 Wolai 是直接使用官方提供的 [API](https://www.wolai.com/wolai/7FB9PLeqZ1ni9FfD11WuUi)，因为 Notion 有第三方 SDK，所以使用的是开源的 [notion-sdk-py](https://github.com/ramnes/notion-sdk-py)
