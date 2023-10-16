@@ -2,7 +2,7 @@
   <br>
   <img src="docs/img/wolai2notion_logo.png" alt="wolai2notion"  width="750" />
   <br>
-  <b>🎭 Wolai Convert To Notion</b>
+  <b>Wolai Convert To Notion</b>
   <br>
 </h1>
 <p align="center">
