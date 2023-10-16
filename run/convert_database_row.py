@@ -33,8 +33,12 @@ def start_convert():
           f'从【{wolai.rows[start_idx].title}】开始, 到【{wolai.rows[end_idx].title}】结束')
 
     exclude_str = input("请输入以上区间中需要排除转换的 idx，元素之间用空格分隔，若无排除的则按回车键: ")
-    exclude_list = [int(x) for x in exclude_str.split()]
-
+    exclude_idx_list = [int(x) for x in exclude_str.split()]
+    exclude_title_list = [wolai.rows[idx].title for idx in exclude_idx_list]
+    print("需要排除的 (idx, title) 如下: ")
+    for item in list(zip(exclude_idx_list, exclude_title_list)):
+        print(item)
+        
     # 是否需要 oss 上传图片
     need_oss = input('是否需要将 wolai 的图片上传至 oss，notion 直接访问 oss (y/n): ')
     if need_oss == 'y':
@@ -55,7 +59,7 @@ def start_convert():
     with ThreadPoolExecutor(max_workers=max_workers) as t:
         futures = {}
         for idx in range(len(wolai.rows)):
-            if idx < start_idx or idx in exclude_list:
+            if idx < start_idx or idx in exclude_idx_list:
                 continue
             if idx > end_idx:
                 break

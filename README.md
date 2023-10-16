@@ -171,3 +171,9 @@ ModuleNotFoundError: No module named 'block_convert'
   ```shell
   export PYTHONPATH=$PYTHONPATH:/home/python/project
   ```
+
+### code.rich_text[0].text.content.length should be ≤ `2000`, instead was `xxxx`
+
+原因：Notion 中，code block 的 content 长度最大只能是 2000
+
+解决办法：手动复制
