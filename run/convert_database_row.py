@@ -48,7 +48,6 @@ def start_convert():
         print('❌ 未开启 oss 上传图片功能')
 
     # 写 csv 文件表头
-    utils.write_csv_row_with_convert_res(list_item=["wolai_page_id", "wolai_page_title", "top_block"])
     convert_process_path = utils.write_csv_row_with_convert_process(list_item=["row_idx(start_with_0)",
                                                                                "row_title(I'm_placeholder)",
                                                                                "total_idx(total_rows-1)",
@@ -85,7 +84,6 @@ def start_convert():
             continue    # 不影响其他线程执行
 
         print(f'✅ 转换成功 ✅，database_row idx【{idx}】, title【{wolai.rows[idx].title}】')
-        utils.write_csv_row_with_convert_res(list_item=["", "", ""])  # 写空行，用于分割不同的 database_row
         utils.write_csv_row_with_convert_process(list_item=[idx, wolai.rows[idx].title,
                                                             len(wolai.rows), constants.ConvertRes.SUCCESS])  # 写进度
 
@@ -153,37 +151,13 @@ def insert_notion_block(wolai_block_type, wolai_block_content_list, wolai_table_
     if notion_page.title != wolai_page.title:
         raise f'wolai_page: {wolai_page.title} 与 notion_page: {notion_page.title} 不匹配'
 
-    notion_block_type = notion_block.get_block_type_from_wolai(wolai_block_type, attach_info)
-
-    if handle_children:  # 当处理子 block 时，parent_block_id 为上一个 block 的 id
-        parent_block_id = parent_block_id_stack[-1]
-
-    # table 类型的 block 特殊处理
-    if notion_block_type == notion_block.NotionBlockType.TABLE:
-        common_notion.insert_table_block(wolai_table_content_list, attach_info,
-                                         notion_block_type, notion, parent_block_id)
-        return  # table 类型的 block 处理完毕，直接返回
-
-    children_item = common_notion.build_children_item(notion_block_type, wolai_block_content_list, attach_info, oss)
-
-    children = [children_item]  # 调用 notion API 时的参数，用于插入子 block
-
     try:
-        response = notion.blocks.children.append(
-            block_id=parent_block_id,
-            **{
-                "children": children
-            }
-        )
+        response = common_notion.insert_notion_block(
+            wolai_block_type, attach_info, handle_children, parent_block_id_stack,
+            parent_block_id, wolai_block_content_list, wolai_table_content_list, notion, oss)
     except Exception as e:
         print(f'❌ 插入 block 失败 ❌，database_row idx【{page_match_idx}】, title【{wolai_page.title}】，原因: {e}')
         raise e
-
-    # 当插入的 block 是一级标题时，记录一下转换结果（以一级标题来细化，当插入失败时，可以根据一级标题来定位）
-    if notion_block_type == notion_block.NotionBlockType.HEADING_1:
-        utils.write_csv_row_with_convert_res(
-            list_item=[wolai_page.page_id, wolai_page.title, wolai_block_content_list[0].content]
-        )
 
     print(f'✅ 插入 block 成功 ✅，database_row idx【{page_match_idx}】, title【{wolai_page.title}】')
 

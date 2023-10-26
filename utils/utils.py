@@ -24,12 +24,12 @@ def get_yaml_data(yaml_file_path):
     return yaml_data
 
 
-def write_csv_row_with_convert_res(list_item):
-    with open(convert_res_csv_path, 'a', encoding="utf8") as f:
-        line = ",".join(str(x) for x in list_item) + "\n"
-        line = line.replace(" ", "")
-        f.write(line)
-    return convert_res_csv_path
+# def write_csv_row_with_convert_res(list_item):
+#     with open(convert_res_csv_path, 'a', encoding="utf8") as f:
+#         line = ",".join(str(x) for x in list_item) + "\n"
+#         line = line.replace(" ", "")
+#         f.write(line)
+#     return convert_res_csv_path
 
 
 def write_csv_row_with_convert_process(list_item):

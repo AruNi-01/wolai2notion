@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <img src="docs/img/wolai2notion_logo.png" alt="wolai2notion"  width="750" />
+  <img src="docs/img/wolai2notion_logo.png" alt="wolai2notion"  width="898" />
   <br>
   <b>Wolai Convert To Notion</b>
   <br>

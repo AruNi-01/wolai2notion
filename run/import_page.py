@@ -123,26 +123,10 @@ def insert_notion_block(wolai_block_type, wolai_block_content_list, wolai_table_
     :param parent_block_id: 当前 block 的 parent_block_id
     :return:
     """
-    notion_block_type = notion_block.get_block_type_from_wolai(wolai_block_type, attach_info)
-
-    if handle_children:  # 当处理子 block 时，parent_block_id 为上一个 block 的 id
-        parent_block_id = parent_block_id_stack[-1]
-
-    # table 类型的 block 特殊处理
-    if notion_block_type == notion_block.NotionBlockType.TABLE:
-        common_notion.insert_table_block(wolai_table_content_list, attach_info, notion_block_type, notion, parent_block_id)
-        return  # table 类型的 block 处理完毕，直接返回
-
-    children_item = common_notion.build_children_item(notion_block_type, wolai_block_content_list, attach_info, oss)
-
-    children = [children_item]  # 调用 notion API 时的参数，用于插入子 block
     try:
-        response = notion.blocks.children.append(
-            block_id=parent_block_id,
-            **{
-                "children": children
-            }
-        )
+        response = common_notion.insert_notion_block(
+            wolai_block_type, attach_info, handle_children, parent_block_id_stack,
+            parent_block_id, wolai_block_content_list, wolai_table_content_list, notion, oss)
     except Exception as e:
         print(f'❌ 插入 block 失败 ❌，page title【{notion.title}】，原因: {e}')
         raise e
