@@ -182,6 +182,7 @@ ModuleNotFoundError: No module named 'block_convert'
   ```shell
   export PYTHONPATH=$PYTHONPATH:/home/python/project
   ```
+  > 若是 win，可以直接到环境变量中，将项目地址添加到 PYTHONPATH 中。
 
 ### code.rich_text[0].text.content.length should be ≤ `2000`, instead was `xxxx`
 

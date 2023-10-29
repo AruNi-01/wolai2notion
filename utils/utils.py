@@ -8,10 +8,10 @@ root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 conf_dir = os.path.join(root_dir, 'conf/conf.yml')
 
 current_time = datetime.now()
-formatted_time = current_time.strftime("%Y-%m-%d_%H:%M:%S")
+formatted_time = current_time.strftime("%Y%m%d_%H%M%S")
 
-convert_res_csv_path = os.path.join(root_dir, 'csv_result/convert_res.' + formatted_time + '.csv')
-convert_process_csv_path = os.path.join(root_dir, 'csv_result/convert_process.' + formatted_time + '.csv')
+convert_res_csv_path = os.path.join(root_dir, 'csv_result' + os.path.sep + 'convert_res.' + formatted_time + '.csv')
+convert_process_csv_path = os.path.join(root_dir, 'csv_result' + os.path.sep + 'convert_process.' + formatted_time + '.csv')
 
 
 def get_conf_data():
