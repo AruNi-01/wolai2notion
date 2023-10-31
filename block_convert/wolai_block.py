@@ -13,6 +13,7 @@ class WolaiBlockType:
     SIMPLE_TABLE = 'simple_table'   # 简单表格
     CALLOUT = 'callout'       # 标注框
     BLOCK_EQUATION = 'block_equation'   # 公式
+    REFERENCE = 'reference'     # 引用
 
 
 # 整个大 Block 的内容中，每个 content 的类型

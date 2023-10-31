@@ -28,7 +28,7 @@ Wolai 是直接使用官方提供的 [API](https://www.wolai.com/wolai/7FB9PLeqZ
   - [x] 并发转换，提高 rows 过多时的转换速度，但 log 和 csv 会混乱
 - [x] image/file 上传至 oss，然后替换 url（[Notion API 暂时不支持上传 file 到 Notion](https://developers.notion.com/reference/file-object)）
 - [x] 纯 Page 的导入
-- [ ] [Wolai 行内引用、嵌入引用、页面引用](https://www.wolai.com/wolai/i1eTuzCbCDV4ymqaDPRN5w)（理论上可以用 Notion 的 Sync Block 和 Link To Page 实现，但无法保证原 Block 一定比该引用先创建，因此暂且搁置）
+- [ ] [Wolai 行内引用、嵌入引用、页面引用](https://www.wolai.com/wolai/i1eTuzCbCDV4ymqaDPRN5w)（理论上可以用 Notion 的 Sync Block 和 Link To Page 实现，但无法保证原 Block 一定比该引用先创建，因此暂且搁置。目前只是简单的填充 Block 内容，不做关联）
 
 支持的 Block、Block 内的 Content 类型（[Wolai Block Type](https://www.wolai.com/wolai/uKwoVabBPqLniFDN6BgRN9)｜[Notion Block Type](https://developers.notion.com/reference/block#block-type-objects)）：
 
@@ -48,6 +48,7 @@ class BlockType:
     TABLE = 'table'  # 表格
     CALLOUT = 'callout'       # 标注框
     BLOCK_EQUATION = 'block_equation'   # 公式
+    REFERENCE = 'reference'     # 引用
 
 
 # 整个大 Block 的内容中，每个 content 的类型，支持外链 link

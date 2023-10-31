@@ -139,6 +139,8 @@ def insert_notion_block(wolai_block_type, wolai_block_content_list, wolai_table_
                 · 当 block.type 为 bookmark 时，attach_info 为其 url 地址
                 · 当 block.type 为 image 时，attach_info 为其 url 地址
                 · 当 block.type 为 table 时，attach_info 为其是否有表头
+                · 当 block.type 为 callout 时，attach_info 为其图标
+                · 当 block.type 为 reference 时，attach_info 为其源 block 的 id
     :param handle_children: 是否处理子 block
     :param wolai_children_ids: 子 block 的 id list
     :param page_match_idx: 用于获取 page，匹配 wolai 和 notion page 的 title 是否一致

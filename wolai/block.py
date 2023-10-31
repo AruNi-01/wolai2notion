@@ -24,10 +24,15 @@ class Block(Database):
     def get_block_list_from_block(self, block_id):
         return self.get_block_list(block_id, False)
 
-    # 根据 page_id 或 block_id 获取 block 列表：
-    #   · 如果是 page_id，则获取该 page 的所有子 block（wolai api: GET /blocks/{id}/children)
-    #   · 如果是 block_id，则获取该 block 的子 block (wolai api: GET /blocks/{id})
     def get_block_list(self, page_or_block_id, is_get_children):
+        """
+        根据 page_id 或 block_id 获取 block 列表：
+            · 如果是 page_id，则获取该 page 的所有子 block（wolai api: GET /blocks/{id}/children)
+            · 如果是 block_id，则获取该 block 的子 block (wolai api: GET /blocks/{id})
+        :param page_or_block_id:
+        :param is_get_children:
+        :return:
+        """
         headers = {
             "Authorization": self.token
         }
@@ -73,6 +78,9 @@ class Block(Database):
                 block.table_content = json_block['table_content']
             if block.type == WolaiBlockType.CALLOUT:
                 block.icon = json_block['icon']['icon']
+            if block.type == WolaiBlockType.REFERENCE:
+                source_block_id = json_block['source_block_id']
+                return self.get_block_list_from_block(source_block_id)
             block_list.append(block)
 
         return block_list
