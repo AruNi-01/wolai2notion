@@ -52,7 +52,7 @@ def get_attach_info(block):
         attach_info = block.language
     if block.type == WolaiBlockType.BOOKMARK:
         attach_info = block.url
-    if block.type == WolaiBlockType.IMAGE:
+    if block.type == WolaiBlockType.IMAGE or block.type == WolaiBlockType.VIDEO:
         attach_info = block.url
     if block.type == WolaiBlockType.SIMPLE_TABLE:
         attach_info = block.table_has_header

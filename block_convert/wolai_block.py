@@ -6,6 +6,7 @@ class WolaiBlockType:
     TOGGLE_LIST = 'toggle_list'     # 折叠列表
     CODE = 'code'       # 代码块
     IMAGE = 'image'     # 图片
+    VIDEO = 'video'     # 视频
     QUOTE = 'quote'     # 引用 (markdown 中的 >)
     TEXT = 'text'       # 文本
     BOOKMARK = 'bookmark'   # 书签

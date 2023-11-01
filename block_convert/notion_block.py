@@ -10,6 +10,7 @@ class NotionBlockType:
     TOGGLE = 'toggle'  # 折叠列表
     CODE = 'code'  # 代码块
     IMAGE = 'image'  # 图片
+    VIDEO = 'video'  # 视频
     QUOTE = 'quote'  # 引用 (markdown 中的 >)
     PARAGRAPH = 'paragraph'  # 文本段落
     BOOKMARK = 'bookmark'  # 书签
@@ -51,6 +52,8 @@ def get_block_type_from_wolai(wolai_block_type, attach_info):
         return NotionBlockType.CODE
     if wolai_block_type == WolaiBlockType.IMAGE:
         return NotionBlockType.IMAGE
+    if wolai_block_type == WolaiBlockType.VIDEO:
+        return NotionBlockType.VIDEO
     if wolai_block_type == WolaiBlockType.QUOTE:
         return NotionBlockType.QUOTE
     if wolai_block_type == WolaiBlockType.TEXT:

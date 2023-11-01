@@ -41,6 +41,7 @@ class BlockType:
     TOGGLE_LIST = 'toggle_list'     # 折叠列表
     CODE = 'code'       # 代码块
     IMAGE = 'image'     # 图片
+    VIDEO = 'video'     # 视频
     QUOTE = 'quote'     # 引用 (markdown 中的 >)
     TEXT = 'text'       # 文本
     BOOKMARK = 'bookmark'   # 书签
@@ -190,3 +191,9 @@ ModuleNotFoundError: No module named 'block_convert'
 原因：Notion 中，code block 的 content 长度最大只能是 2000
 
 解决办法：手动复制
+
+### [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+
+原因：抓取信息太过频繁，引起远程主机的怀疑，被网站怀疑是恶意攻击行为。
+
+解决办法：确认网络稳定的情况下，进行重试。

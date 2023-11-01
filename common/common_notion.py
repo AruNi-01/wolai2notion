@@ -113,7 +113,8 @@ def build_children_item(notion_block_type, wolai_block_content_list, attach_info
         children_item[notion_block_type]['url'] = attach_info
     if notion_block_type == notion_block.NotionBlockType.DIVIDER:   # 分割线
         del children_item[notion_block_type]['rich_text']  # divider 类型的 block 不需要 rich_text
-    if notion_block_type == notion_block.NotionBlockType.IMAGE:  # image 类型的 block 需要设置为 external 类型
+    # image/video 类型的 block 需要设置为 external 类型
+    if notion_block_type == notion_block.NotionBlockType.IMAGE or notion_block_type == notion_block.NotionBlockType.VIDEO:
         if oss is not None:
             attach_info = oss.upload_remote_image(attach_info)
         del children_item[notion_block_type]['rich_text']
