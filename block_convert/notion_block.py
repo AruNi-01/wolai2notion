@@ -72,7 +72,10 @@ def get_block_type_from_wolai(wolai_block_type, attach_info):
 
 def get_code_language_from_wolai(wolai_code_language):
     # wolai 中的 text 对应 notion 中的 plain text；notion 中的 code language 全是小写
-    return "plain text" if wolai_code_language == "text" else wolai_code_language.lower()
+    if wolai_code_language == "text" or wolai_code_language == "纯文本":
+        return "plain text"
+    else:
+        return wolai_code_language.lower()
 
 
 def rich_text_item_is_bold(wolai_block_content_type):
