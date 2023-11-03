@@ -150,7 +150,7 @@ python3 ./run/import_page.py
 
 错误信息：ValueError: Request failed with status code:429
 
-原因：Wolai API 调用频率限制，每小时只能调用 500 次
+原因：[Wolai API 调用频率限制](https://www.wolai.com/wolai/8vB1m96e4QYiRzjStcaen5)，每小时只能调用 500 次，每月只能调用 10000 次（个人专业版）
 
 ```json
 {
