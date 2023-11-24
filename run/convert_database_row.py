@@ -1,15 +1,18 @@
 import concurrent.futures
+import os
+import sys
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 
 from block_convert.wolai_block import WolaiBlockType
-from block_convert import notion_block
 
 from notion.database import Database as NotionDatabase
 from wolai.block import Block as WolaiBlock
 
 from common import common_notion, common_wolai, common, constants
 from utils import utils, oss_client
+
+sys.path.append(os.getcwd())
 
 wolai = WolaiBlock()
 notion = NotionDatabase()
